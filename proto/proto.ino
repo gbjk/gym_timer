@@ -37,6 +37,8 @@ SevSeg sevseg;
 #define BUTTON_PLUS  0xFF906F
 #define BUTTON_MINUS 0xFFA857
 
+#define ALARM_DURATION 6000
+
 IRrecv irrecv(IR_PIN);
 decode_results results;
 
@@ -46,6 +48,7 @@ byte edit_digit;
 
 unsigned long last_flash;
 unsigned long last_sec;
+unsigned long alarm_time;
 
 int secs = DEFAULT_SECS;
 int mins = DEFAULT_MINS;
@@ -80,13 +83,17 @@ void loop() {
   if (mils - last_flash > flash_rate){
     flash_state = flash_state ? 0 : 1;
     last_flash = mils;
+    // Only end an alarm as flash state goes down
+    if (mode == ALARM && !flash_state && mils - alarm_time > ALARM_DURATION){
+      end_alarm();
+      }
     }
 
   if (mode == COUNTDOWN){
     do_countdown(mils);
   }
   else if (mode == EDIT){
-    if (flash_state){
+    if (!flash_state){
       // Flash digit 2
       sevseg.HideNum(edit_digit);
       }
@@ -95,13 +102,12 @@ void loop() {
   if (mode == ALARM){
     if (flash_state){
       digitalWrite(BUZZ_PIN, HIGH);
-
-      show = false;
-      }
+    }
     else {
       digitalWrite(BUZZ_PIN, LOW);
-      }
+      show = false;
     }
+  }
 
   if (show){
     sevseg.PrintOutput();
@@ -132,6 +138,9 @@ void do_countdown(unsigned long mils){
       mode = ALARM;
       mins = 5;
       secs = 55;
+      alarm_time = mils;
+      // Ensure we're flashing up
+      flash_state = 1;
     }
     else {
       secs -= 1;
