@@ -17,21 +17,25 @@ SevSeg sevseg;
 #define ALARM       4
 #define EDIT        5
 
-#define BUTTON_0    0xFF6897
-#define BUTTON_1    0xFF30CF
-#define BUTTON_2    0xFF18E7
-#define BUTTON_3    0xFF7A85
-#define BUTTON_4    0xFF10EF 
-#define BUTTON_5    0xFF38C7
-#define BUTTON_6    0xFF5AA5
-#define BUTTON_7    0xFF42BD
-#define BUTTON_8    0xFF4AB5
-#define BUTTON_9    0xFF52AD
-#define BUTTON_FF   0xFFC23D 
-#define BUTTON_RW   0xFF02FD
-#define BUTTON_PLAY 0xFF22DD
-#define BUTTON_MODE 0xFF629D
-#define BUTTON_PWR  0xFFA25D
+#define BUTTON_0     0xFF6897
+#define BUTTON_1     0xFF30CF
+#define BUTTON_2     0xFF18E7
+#define BUTTON_3     0xFF7A85
+#define BUTTON_4     0xFF10EF 
+#define BUTTON_5     0xFF38C7
+#define BUTTON_6     0xFF5AA5
+#define BUTTON_7     0xFF42BD
+#define BUTTON_8     0xFF4AB5
+#define BUTTON_9     0xFF52AD
+#define BUTTON_FF    0xFFC23D 
+#define BUTTON_RW    0xFF02FD
+#define BUTTON_PLAY  0xFF22DD
+#define BUTTON_MODE  0xFF629D
+#define BUTTON_PWR   0xFFA25D
+#define BUTTON_MUTE  0xFFE21D
+#define BUTTON_SWAP  0xFF9867
+#define BUTTON_PLUS  0xFF906F
+#define BUTTON_MINUS 0xFFA857
 
 IRrecv irrecv(IR_PIN);
 decode_results results;
@@ -63,7 +67,7 @@ void setup()
   mode = WAIT;
 
   Serial.begin(9600);
-    
+
   irrecv.enableIRIn(); 
 }
 
@@ -79,21 +83,7 @@ void loop() {
     }
 
   if (mode == COUNTDOWN){
-    if (mils - last_sec >= 1000){
-      if (mins == 0 && secs == 0){
-        mode = ALARM;
-        mins = 5;
-        secs = 55;
-      }
-      else {
-        secs -= 1;
-        if (secs < 0){
-          mins -= 1;
-          secs = 59;
-        }
-        last_sec = mils;
-      }
-    }
+    do_countdown(mils);
   }
   else if (mode == EDIT){
     if (flash_state){
@@ -105,6 +95,7 @@ void loop() {
   if (mode == ALARM){
     if (flash_state){
       digitalWrite(BUZZ_PIN, HIGH);
+
       show = false;
       }
     else {
@@ -135,6 +126,24 @@ void loop() {
   sevseg.ShowAll();
 }
 
+void do_countdown(unsigned long mils){
+  if (mils - last_sec >= 1000){
+    if (mins == 0 && secs == 0){
+      mode = ALARM;
+      mins = 5;
+      secs = 55;
+    }
+    else {
+      secs -= 1;
+      if (secs < 0){
+        mins -= 1;
+        secs = 59;
+      }
+      last_sec = mils;
+    }
+  }
+}
+
 void handle_key(unsigned long code){
   int new_number = 10;
   switch (code){
@@ -148,46 +157,71 @@ void handle_key(unsigned long code){
     case BUTTON_7:     new_number = 7; break;
     case BUTTON_8:     new_number = 8; break;
     case BUTTON_9:     new_number = 9; break;
-    case BUTTON_FF:    Serial.println("Got FF"); break;
-    case BUTTON_RW:    Serial.println("Got RW"); break;
     case BUTTON_PLAY:
-      mode = COUNTDOWN;
-      break;
-    case BUTTON_MODE:  
       if (mode == ALARM){
-        // Reset the default display
-        digitalWrite(BUZZ_PIN, LOW);
-        secs = DEFAULT_SECS;
-        mins = DEFAULT_MINS;
+        end_alarm();
         }
-      mode = mode == EDIT ? WAIT : EDIT;
-      if (mode == EDIT){
-        edit_digit = 1;
+      else {
+        mode = mode == COUNTDOWN ? WAIT : COUNTDOWN;
         }
       break;
-    case BUTTON_PWR:   Serial.println("Got PWR"); break;
+    case BUTTON_MODE:
+      handle_mode();
+      break;
 
-    default:    Serial.println("Other button");
+    // Currently unused
+    case BUTTON_FF:
+    case BUTTON_RW:
+    case BUTTON_MUTE:
+    case BUTTON_PWR:
+      break;
+
+    default:
+      Serial.print("Other button: ");
+      Serial.println(code, HEX);
   }
 
   if (new_number < 10){
+    handle_number(new_number);
+  }
+}
 
+void end_alarm(){
+  digitalWrite(BUZZ_PIN, LOW);
+  // Reset the default display
+  secs = DEFAULT_SECS;
+  mins = DEFAULT_MINS;
+  mode = WAIT;
+  }
+
+void handle_mode(){
+  if (mode == ALARM){
+    end_alarm();
+  }
+  else {
+    mode = mode == EDIT ? WAIT : EDIT;
     if (mode == EDIT){
-      if (edit_digit < 2){
-        mins = new_number;
-      }
-      else if (edit_digit == 2){
-        int decimal = secs % 10;
-        secs = (10 * new_number) + decimal;
-      }
-      else {
-        int decimal = secs / 10;
-        secs = (10 * decimal) + new_number;
-      }
-      edit_digit += 1;
-      if (edit_digit > 3){
-        edit_digit = 1;
-      }
+      edit_digit = 1;
+    }
+  }
+}
+
+void handle_number(int new_number){
+  if (mode == EDIT){
+    if (edit_digit < 2){
+      mins = new_number;
+    }
+    else if (edit_digit == 2){
+      int decimal = secs % 10;
+      secs = (10 * new_number) + decimal;
+    }
+    else {
+      int decimal = secs / 10;
+      secs = (10 * decimal) + new_number;
+    }
+    edit_digit += 1;
+    if (edit_digit > 3){
+      edit_digit = 1;
     }
   }
 }
