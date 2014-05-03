@@ -53,10 +53,6 @@ Written by Dean Reading, 2012
 
 SevSeg::SevSeg()
 {
-  //Initial values
-  number=8888;
-  DecPlace=0;
-
 }
 
 //Begin
@@ -147,208 +143,137 @@ void SevSeg::PrintOutput(){
 //New Number
 /*******************************************************************************************/
 //Function to update the number displayed
-void SevSeg::NewNum(int number_in, byte DecPlace_in)
+void SevSeg::NewNum(char display[4], byte decimal_place)
 {
-  //Feed the inputs into the library's variables
-  number=number_in;
-  DecPlace=DecPlace_in;
-  FindNums();
-  CreateArray();
-}
+  for (byte i=0;i<4;i++) {
+    char digit = display[i];
 
-
-//Find Digits (Nums)
-/*******************************************************************************************/
-//Function to find the four individual digits to be displayed from the variable 'number'
-void SevSeg::FindNums() {
-  //If the number received is negative, set the flag and make the number positive
-  if (number<0) {
-    negative=1;
-    number=number*-1;
-  }
-  else {
-    negative=0;
-  }
-
-  //If the number is out of range, just display '----'
-  if ((negative==0 && number>9999) || (negative==1 && number>999)) {
-    nums[0]=21;
-    nums[1]=21;
-    nums[2]=21;
-    nums[3]=21;
-  }
-
-  else{
-    //Find the four digits
-    int total=number;
-    if (negative==0) {
-      nums[0]=number/1000;
-      total=total-nums[0]*1000;
-    }
-    else {
-      nums[0]=21;
-    }
-    nums[1]=total/100;
-    total=total-nums[1]*100;
-    nums[2]=total/10;
-    nums[3]=total-nums[2]*10;
-
-
-    //If there are zeros, set them to 20 which means a blank
-    //However, don't cut out significant zeros
-    if (negative==0) {
-      if (nums[0]==0 && DecPlace<3){
-        nums[0]=20;
-        if (nums[1]==0 && DecPlace<2) {
-          nums[1]=20;
-          if (nums[2]==0 && DecPlace==0) {
-            nums[2]=20;
-          }
-        }
-      }
-    }
-    else {
-      if (nums[1]==0 && DecPlace<2) {
-        nums[1]=20;
-        if (nums[2]==0 && DecPlace==0) {
-          nums[2]=20;
-        }
-      }
-    }
-  }
-}
-
-//Create Array
-/*******************************************************************************************/
-//From the numbers found, says which LEDs need to be turned on
-void SevSeg::CreateArray() {
-  for (byte digit=0;digit<4;digit++) {
-    switch (nums[digit]){
-    case 0:
-      lights[digit][0]=1;
-      lights[digit][1]=1;
-      lights[digit][2]=1;
-      lights[digit][3]=1;
-      lights[digit][4]=1;
-      lights[digit][5]=1;
-      lights[digit][6]=0;
+    switch (digit){
+    case '0':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=1;
+      lights[i][4]=1;
+      lights[i][5]=1;
+      lights[i][6]=0;
       break;
-    case 1:
-      lights[digit][0]=0;
-      lights[digit][1]=1;
-      lights[digit][2]=1;
-      lights[digit][3]=0;
-      lights[digit][4]=0;
-      lights[digit][5]=0;
-      lights[digit][6]=0;
+    case '1':
+      lights[i][0]=0;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=0;
+      lights[i][4]=0;
+      lights[i][5]=0;
+      lights[i][6]=0;
       break;
-    case 2:
-      lights[digit][0]=1;
-      lights[digit][1]=1;
-      lights[digit][2]=0;
-      lights[digit][3]=1;
-      lights[digit][4]=1;
-      lights[digit][5]=0;
-      lights[digit][6]=1;
+    case '2':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=0;
+      lights[i][3]=1;
+      lights[i][4]=1;
+      lights[i][5]=0;
+      lights[i][6]=1;
       break;
-    case 3:
-      lights[digit][0]=1;
-      lights[digit][1]=1;
-      lights[digit][2]=1;
-      lights[digit][3]=1;
-      lights[digit][4]=0;
-      lights[digit][5]=0;
-      lights[digit][6]=1;
+    case '3':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=1;
+      lights[i][4]=0;
+      lights[i][5]=0;
+      lights[i][6]=1;
       break;
-    case 4:
-      lights[digit][0]=0;
-      lights[digit][1]=1;
-      lights[digit][2]=1;
-      lights[digit][3]=0;
-      lights[digit][4]=0;
-      lights[digit][5]=1;
-      lights[digit][6]=1;
+    case '4':
+      lights[i][0]=0;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=0;
+      lights[i][4]=0;
+      lights[i][5]=1;
+      lights[i][6]=1;
       break;
-    case 5:
-      lights[digit][0]=1;
-      lights[digit][1]=0;
-      lights[digit][2]=1;
-      lights[digit][3]=1;
-      lights[digit][4]=0;
-      lights[digit][5]=1;
-      lights[digit][6]=1;
+    case '5':
+      lights[i][0]=1;
+      lights[i][1]=0;
+      lights[i][2]=1;
+      lights[i][3]=1;
+      lights[i][4]=0;
+      lights[i][5]=1;
+      lights[i][6]=1;
       break;
-    case 6:
-      lights[digit][0]=1;
-      lights[digit][1]=0;
-      lights[digit][2]=1;
-      lights[digit][3]=1;
-      lights[digit][4]=1;
-      lights[digit][5]=1;
-      lights[digit][6]=1;
+    case '6':
+      lights[i][0]=1;
+      lights[i][1]=0;
+      lights[i][2]=1;
+      lights[i][3]=1;
+      lights[i][4]=1;
+      lights[i][5]=1;
+      lights[i][6]=1;
       break;
-    case 7:
-      lights[digit][0]=1;
-      lights[digit][1]=1;
-      lights[digit][2]=1;
-      lights[digit][3]=0;
-      lights[digit][4]=0;
-      lights[digit][5]=0;
-      lights[digit][6]=0;
+    case '7':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=0;
+      lights[i][4]=0;
+      lights[i][5]=0;
+      lights[i][6]=0;
       break;
-    case 8:
-      lights[digit][0]=1;
-      lights[digit][1]=1;
-      lights[digit][2]=1;
-      lights[digit][3]=1;
-      lights[digit][4]=1;
-      lights[digit][5]=1;
-      lights[digit][6]=1;
+    case '8':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=1;
+      lights[i][4]=1;
+      lights[i][5]=1;
+      lights[i][6]=1;
       break;
-    case 9:
-      lights[digit][0]=1;
-      lights[digit][1]=1;
-      lights[digit][2]=1;
-      lights[digit][3]=1;
-      lights[digit][4]=0;
-      lights[digit][5]=1;
-      lights[digit][6]=1;
+    case '9':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=1;
+      lights[i][4]=0;
+      lights[i][5]=1;
+      lights[i][6]=1;
       break;
-    case 20:
-      lights[digit][0]=0;
-      lights[digit][1]=0;
-      lights[digit][2]=0;
-      lights[digit][3]=0;
-      lights[digit][4]=0;
-      lights[digit][5]=0;
-      lights[digit][6]=0;
+    case 'P':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=0;
+      lights[i][3]=0;
+      lights[i][4]=1;
+      lights[i][5]=1;
+      lights[i][6]=1;
       break;
-    case 21:
-      lights[digit][0]=0;
-      lights[digit][1]=0;
-      lights[digit][2]=0;
-      lights[digit][3]=0;
-      lights[digit][4]=0;
-      lights[digit][5]=0;
-      lights[digit][6]=1;
+    case 'r':
+      lights[i][0]=0;
+      lights[i][1]=0;
+      lights[i][2]=0;
+      lights[i][3]=0;
+      lights[i][4]=1;
+      lights[i][5]=0;
+      lights[i][6]=1;
       break;
     default:
-      lights[digit][0]=0;
-      lights[digit][1]=0;
-      lights[digit][2]=1;
-      lights[digit][3]=1;
-      lights[digit][4]=1;
-      lights[digit][5]=0;
-      lights[digit][6]=1;
+      lights[i][0]=0;
+      lights[i][1]=0;
+      lights[i][2]=0;
+      lights[i][3]=0;
+      lights[i][4]=0;
+      lights[i][5]=0;
+      lights[i][6]=0;
       break;
     }
 
     //Set the decimal place lights
-    if (3-digit==DecPlace){
-      lights[digit][7]=1;
+    if (decimal_place == i + 1){
+      lights[i][7]=1;
     }
     else {
-      lights[digit][7]=0;
+      lights[i][7]=0;
     }
   }
 }

@@ -18,9 +18,11 @@ public:
   SevSeg();
 
   //Public Functions
-  void PrintOutput();
-  void NewNum(int number_in, byte DecPlace_in); 
   void Begin(boolean mode_in,byte C1, byte C2, byte C3, byte C4, byte UC1, byte UC2, byte UC3, byte UC4, byte UC5, byte UC6, byte UC7, byte UC8);
+
+  void NewNum(char display[4], byte decimal_place);
+
+  void PrintOutput();
 
   void HideNum(byte digit);
   void ShowAll();
@@ -30,20 +32,13 @@ public:
 
 private:
   //Private Functions
-  void CreateArray();
-  void FindNums();
 
   //Private Variables
-  boolean mode,DigitOn,DigitOff,SegOn,SegOff;
+  boolean mode, DigitOn, DigitOff, SegOn, SegOff;
   byte DigitPins[4];
   byte SegmentPins[8];
   boolean lights[4][8];
-  byte nums[4];
-  int number;
-  byte DecPlace;
-  boolean negative;
   byte hideNum;
-
 };
 
 #endif

@@ -16,6 +16,7 @@ SevSeg sevseg;
 #define COUNTDOWN   3
 #define ALARM       4
 #define EDIT        5
+#define EXPECT_PROGRAM 6
 
 #define BUTTON_0     0xFF6897
 #define BUTTON_1     0xFF30CF
@@ -50,6 +51,7 @@ unsigned long last_flash;
 unsigned long last_sec;
 unsigned long alarm_time;
 
+int expect = 0;
 int secs = DEFAULT_SECS;
 int mins = DEFAULT_MINS;
 const unsigned int powers [4] = {1000,100,10,1};
@@ -69,6 +71,8 @@ void setup()
 
   mode = WAIT;
 
+  set_time();
+
   Serial.begin(9600);
 
   irrecv.enableIRIn(); 
@@ -84,10 +88,12 @@ void loop() {
     flash_state = flash_state ? 0 : 1;
     last_flash = mils;
     // Only end an alarm as flash state goes down
-    if (mode == ALARM && !flash_state && mils - alarm_time > ALARM_DURATION){
-      end_alarm();
+    if (!flash_state){
+      if (mode == ALARM && mils - alarm_time > ALARM_DURATION){
+        end_alarm();
       }
     }
+  }
 
   if (mode == COUNTDOWN){
     do_countdown(mils);
@@ -98,10 +104,16 @@ void loop() {
       sevseg.HideNum(edit_digit);
       }
     }
+  else if (mode == EXPECT_PROGRAM){
+    if (!flash_state){
+      show = false;
+    }
+  }
 
   if (mode == ALARM){
     if (flash_state){
-      digitalWrite(BUZZ_PIN, HIGH);
+      // TODO BUZZER OFF
+      //digitalWrite(BUZZ_PIN, HIGH);
     }
     else {
       digitalWrite(BUZZ_PIN, LOW);
@@ -121,16 +133,17 @@ void loop() {
   }
 
   if (show){
-    int display_timer = (mins * 100) + secs;
-    // Shift decimal left to display 055
-    byte decimal_point = mode == ALARM ? 3 : 2;
-
-    sevseg.NewNum(display_timer, decimal_point);
     sevseg.PrintOutput();
   }
 
   sevseg.ShowAll();
 }
+
+void set_time(){
+  char display_timer[4];
+  sprintf(display_timer, "%2i%02i", mins, secs);
+  sevseg.NewNum(display_timer, 2);
+  }
 
 void do_countdown(unsigned long mils){
   if (mils - last_sec >= 1000){
@@ -150,6 +163,7 @@ void do_countdown(unsigned long mils){
       }
       last_sec = mils;
     }
+  set_time();
   }
 }
 
@@ -176,6 +190,10 @@ void handle_key(unsigned long code){
       break;
     case BUTTON_MODE:
       handle_mode();
+      break;
+
+    case BUTTON_SWAP:
+      mode = EXPECT_PROGRAM;
       break;
 
     // Currently unused
@@ -232,5 +250,13 @@ void handle_number(int new_number){
     if (edit_digit > 3){
       edit_digit = 1;
     }
+  set_time();
+  }
+  else if (mode == EXPECT_PROGRAM){
+    char display_pr[4];
+    sprintf(display_pr, "Pr %1i", new_number);
+
+    sevseg.NewNum(display_pr, 5);
+    mode = WAIT;
   }
 }
