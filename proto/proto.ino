@@ -5,15 +5,21 @@
 
 SevSeg sevseg;
 
+#define ALARM_DURATION 4000
+#define REST_DURATION  2000
+
 #define DEFAULT_MINS 0
 #define DEFAULT_SECS 3
+
+#define DEFAULT_REST_MINS 0
+#define DEFAULT_REST_SECS 5
 
 #define IR_PIN     14
 #define BUZZ_PIN   19
 
 #define OFF             1
 #define WAIT            2
-#define COUNTDOWN       3
+#define ALARM_COUNTDOWN 3
 #define ALARM           4
 #define EDIT            5
 #define EXPECT_PROGRAM  6
@@ -40,8 +46,6 @@ SevSeg sevseg;
 #define BUTTON_PLUS  0xFF906F
 #define BUTTON_MINUS 0xFFA857
 
-#define ALARM_DURATION 4000
-
 IRrecv irrecv(IR_PIN);
 decode_results results;
 
@@ -49,16 +53,21 @@ int mode = 1;
 bool flash_state;
 byte edit_digit;
 
-unsigned long last_flash;
+unsigned long last_tick;
 unsigned long last_sec;
 unsigned long alarm_time;
 unsigned long rest_start;
 
 int expect = 0;
+
 int mins = DEFAULT_MINS;
 int secs = DEFAULT_SECS;
 int last_mins;
 int last_secs;
+
+int rest_mins = DEFAULT_REST_MINS;
+int rest_secs = DEFAULT_REST_SECS;
+
 const unsigned int powers [4] = {1000,100,10,1};
 
 void setup()
@@ -88,10 +97,20 @@ void loop() {
 
   unsigned long mils = millis();
 
-  int flash_rate = mode == EDIT ? 400 : 1000;
-  if (mils - last_flash > flash_rate){
+  int tick_rate = mode == EDIT ? 400 : 1000;
+
+  if (mils - last_tick > tick_rate){
+
+    if (mode == REST && (mils - rest_start > REST_DURATION)){
+      mode = REST_COUNTDOWN;
+      // TODO, real values
+      mins = DEFAULT_REST_MINS;
+      secs = DEFAULT_REST_SECS;
+    }
+
     flash_state = flash_state ? 0 : 1;
-    last_flash = mils;
+    last_tick = mils;
+
 
     if (!flash_state){
 
@@ -102,7 +121,7 @@ void loop() {
     }
   }
 
-  if (mode == COUNTDOWN){
+  if (mode == ALARM_COUNTDOWN || mode == REST_COUNTDOWN){
     do_countdown(mils);
   }
   else if (mode == EDIT){
@@ -155,16 +174,24 @@ void set_time(){
 void do_countdown(unsigned long mils){
   if (mils - last_sec >= 1000){
     if (mins == 0 && secs == 0){
-      mode = ALARM;
+      if (mode == ALARM_COUNTDOWN){
+        mode = ALARM;
 
-      alarm_time = mils;
+        alarm_time = mils;
 
-      char display_timer[4];
-      sprintf(display_timer, "OSSS");
-      sevseg.NewNum(display_timer, 5);
+        char display_timer[4];
+        sprintf(display_timer, "OSSS");
+        sevseg.NewNum(display_timer, 5);
 
-      // Ensure we're flashing up
-      flash_state = 1;
+        // Ensure we're flashing up
+        flash_state = 1;
+      }
+      else if (mode == REST_COUNTDOWN){
+        mins = last_mins;
+        secs = last_secs;
+        mode = WAIT;
+      }
+
 
       return;
     }
@@ -227,7 +254,7 @@ void handle_key(unsigned long code){
 }
 
 void start_alarm(){
-  mode = mode == COUNTDOWN ? WAIT : COUNTDOWN;
+  mode = mode == ALARM_COUNTDOWN ? WAIT : ALARM_COUNTDOWN;
   last_secs = secs;
   last_mins = mins;
   }
