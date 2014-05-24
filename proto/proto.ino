@@ -11,12 +11,13 @@ SevSeg sevseg;
 #define IR_PIN     14
 #define BUZZ_PIN   19
 
-#define OFF         1
-#define WAIT        2
-#define COUNTDOWN   3
-#define ALARM       4
-#define EDIT        5
-#define EXPECT_PROGRAM 6
+#define OFF             1
+#define WAIT            2
+#define COUNTDOWN       3
+#define ALARM           4
+#define EDIT            5
+#define EXPECT_PROGRAM  6
+#define REST            6
 
 #define BUTTON_0     0xFF6897
 #define BUTTON_1     0xFF30CF
@@ -50,6 +51,7 @@ byte edit_digit;
 unsigned long last_flash;
 unsigned long last_sec;
 unsigned long alarm_time;
+unsigned long rest_start;
 
 int expect = 0;
 int secs = DEFAULT_SECS;
@@ -218,7 +220,12 @@ void end_alarm(){
   // Reset the default display
   secs = DEFAULT_SECS;
   mins = DEFAULT_MINS;
-  mode = WAIT;
+  mode = REST;
+  rest_start = millis();
+
+  char display_timer[4];
+  sprintf(display_timer, "rESt");
+  sevseg.NewNum(display_timer, 5);
   }
 
 void handle_mode(){
@@ -260,3 +267,4 @@ void handle_number(int new_number){
     mode = WAIT;
   }
 }
+

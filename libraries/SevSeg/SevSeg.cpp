@@ -248,6 +248,42 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
       lights[i][5]=1;
       lights[i][6]=1;
       break;
+    case 'A':
+      lights[i][0]=1;
+      lights[i][1]=1;
+      lights[i][2]=1;
+      lights[i][3]=0;
+      lights[i][4]=1;
+      lights[i][5]=1;
+      lights[i][6]=1;
+      break;
+    case 'E':
+      lights[i][0]=1;
+      lights[i][1]=0;
+      lights[i][2]=0;
+      lights[i][3]=1;
+      lights[i][4]=1;
+      lights[i][5]=1;
+      lights[i][6]=1;
+      break;
+    case 'S':
+      lights[i][0]=1;
+      lights[i][1]=0;
+      lights[i][2]=1;
+      lights[i][3]=1;
+      lights[i][4]=0;
+      lights[i][5]=1;
+      lights[i][6]=1;
+      break;
+    case 't':
+      lights[i][0]=0;
+      lights[i][1]=0;
+      lights[i][2]=0;
+      lights[i][3]=1;
+      lights[i][4]=1;
+      lights[i][5]=1;
+      lights[i][6]=1;
+      break;
     case 'r':
       lights[i][0]=0;
       lights[i][1]=0;
