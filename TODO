@@ -1,4 +1,4 @@
 
-
-* Fix OSSS and .
+* Fix Editting after alarm editting the rESt
 * Fix countdown starting too early - wait 1 second always.
+* Enter Programmes

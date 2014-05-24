@@ -116,22 +116,23 @@ void SevSeg::Begin(boolean mode_in,byte D1, byte D2, byte D3, byte D4, byte S1, 
 //Cycles through each segment and turns on the correct digits for each.
 //Leaves everything off
 void SevSeg::PrintOutput(){
-  for (byte seg=0;seg<8;seg++) {
-    //Turn the relevant segment on
+  for (byte seg=0;seg < 8;seg++) {
+    // Turn the relevant segment on
     digitalWrite(SegmentPins[seg],SegOn);
 
-    //For each digit, turn relevant digits on
-    for (byte digit=0;digit<4;digit++){
-      if (digit == hideNum){
+    // For each digit, turn relevant digits on
+    for (byte digit=0;digit < 4;digit++){
+      // Hidenum doesn't imply the period
+      if (digit == hideNum && seg != 7){
         continue;
         }
-      if (lights[digit][seg]==1) {
-        digitalWrite(DigitPins[digit],DigitOn);
+      if (lights[digit][seg] == 1) {
+        digitalWrite(DigitPins[digit], DigitOn);
       }
       //delay(200); //Uncomment this to see it in slow motion
     }
-    //Turn all digits off
-    for (byte digit=0;digit<4;digit++){
+    // Turn all digits off
+    for (byte digit=0;digit < 4;digit++){
       digitalWrite(DigitPins[digit],DigitOff);
     }
 
@@ -145,11 +146,13 @@ void SevSeg::PrintOutput(){
 //Function to update the number displayed
 void SevSeg::NewNum(char display[4], byte decimal_place)
 {
+
   for (byte i=0;i<4;i++) {
     char digit = display[i];
 
     switch (digit){
     case '0':
+    case 'O':
       lights[i][0]=1;
       lights[i][1]=1;
       lights[i][2]=1;
@@ -195,6 +198,7 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
       lights[i][6]=1;
       break;
     case '5':
+    case 'S':
       lights[i][0]=1;
       lights[i][1]=0;
       lights[i][2]=1;
@@ -263,15 +267,6 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
       lights[i][2]=0;
       lights[i][3]=1;
       lights[i][4]=1;
-      lights[i][5]=1;
-      lights[i][6]=1;
-      break;
-    case 'S':
-      lights[i][0]=1;
-      lights[i][1]=0;
-      lights[i][2]=1;
-      lights[i][3]=1;
-      lights[i][4]=0;
       lights[i][5]=1;
       lights[i][6]=1;
       break;
