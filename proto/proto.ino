@@ -6,7 +6,9 @@
 SevSeg sevseg;
 
 #define ALARM_DURATION 4000
-#define REST_DURATION  2000
+#define WARN_DURATION  2000
+
+#define USE_BUZZER 1
 
 #define DEFAULT_MINS 0
 #define DEFAULT_SECS 3
@@ -25,6 +27,7 @@ SevSeg sevseg;
 #define EXPECT_PROGRAM  6
 #define REST            7
 #define REST_COUNTDOWN  8
+#define WARN            9
 
 #define BUTTON_0     0xFF6897
 #define BUTTON_1     0xFF30CF
@@ -56,7 +59,7 @@ byte edit_digit;
 unsigned long last_tick;
 unsigned long last_sec;
 unsigned long alarm_time;
-unsigned long rest_start;
+unsigned long warn_start;
 
 int expect = 0;
 
@@ -101,16 +104,18 @@ void loop() {
 
   if (mils - last_tick > tick_rate){
 
-    if (mode == REST && (mils - rest_start > REST_DURATION)){
-      mode = REST_COUNTDOWN;
-      // TODO, real values
-      mins = DEFAULT_REST_MINS;
-      secs = DEFAULT_REST_SECS;
+    if ((mode == REST || mode == WARN) && (mils - warn_start > WARN_DURATION)){
+      if (mode == REST){
+        mode = REST_COUNTDOWN;
+      }
+      else if (mode == WARN){
+        mode = ALARM_COUNTDOWN;
+        digitalWrite(BUZZ_PIN, LOW);
+      }
     }
 
     flash_state = flash_state ? 0 : 1;
     last_tick = mils;
-
 
     if (!flash_state){
 
@@ -118,6 +123,12 @@ void loop() {
       if (mode == ALARM && mils - alarm_time > ALARM_DURATION){
         end_alarm();
       }
+    }
+  }
+
+  if (mode == WARN){
+    if (USE_BUZZER){
+      digitalWrite(BUZZ_PIN, HIGH);
     }
   }
 
@@ -138,8 +149,9 @@ void loop() {
 
   if (mode == ALARM){
     if (flash_state){
-      // TODO BUZZER OFF
-      //digitalWrite(BUZZ_PIN, HIGH);
+      if (USE_BUZZER){
+        digitalWrite(BUZZ_PIN, HIGH);
+      }
     }
     else {
       digitalWrite(BUZZ_PIN, LOW);
@@ -189,9 +201,10 @@ void do_countdown(unsigned long mils){
       else if (mode == REST_COUNTDOWN){
         mins = last_mins;
         secs = last_secs;
-        mode = WAIT;
+        start_alarm_countdown();
       }
 
+      last_tick = last_sec = millis();
 
       return;
     }
@@ -225,7 +238,7 @@ void handle_key(unsigned long code){
         end_alarm();
         }
       else {
-        start_alarm();
+        start_alarm_countdown();
         }
       break;
     case BUTTON_MODE:
@@ -253,17 +266,33 @@ void handle_key(unsigned long code){
   }
 }
 
-void start_alarm(){
-  mode = mode == ALARM_COUNTDOWN ? WAIT : ALARM_COUNTDOWN;
+void start_alarm_countdown(){
+  mode = mode == ALARM_COUNTDOWN ? WAIT : WARN;
+
   last_secs = secs;
   last_mins = mins;
+
+  last_tick = last_sec = millis();
+
+  char display_timer[4];
+  sprintf(display_timer, " gO ");
+  sevseg.NewNum(display_timer, 5);
+
+  // Make sure we're starting up, for the buzzer
+  flash_state = 1;
   }
 
 void end_alarm(){
   digitalWrite(BUZZ_PIN, LOW);
   // Reset the default display
   mode = REST;
-  rest_start = millis();
+  warn_start = millis();
+
+  // TODO, real values
+  mins = DEFAULT_REST_MINS;
+  secs = DEFAULT_REST_SECS;
+
+  last_tick = last_sec = millis();
 
   char display_timer[4];
   sprintf(display_timer, "rESt");
@@ -278,7 +307,7 @@ void handle_mode(){
     int old_mode = mode;
     mode = mode == EDIT ? WAIT : EDIT;
     if (mode == EDIT){
-      if (old_mode == REST){
+      if (old_mode == ALARM_COUNTDOWN || old_mode == ALARM || old_mode == REST || old_mode == REST_COUNTDOWN){
         secs = last_secs;
         mins = last_mins;
         set_time();

@@ -1,5 +1,5 @@
 
-* Sometimes OSSS starts displaying off flash
+* Double check timers are always starting inclusively
 * Rest countdown
 * Fix countdown starting too early - wait 1 second always.
 * Enter Programmes

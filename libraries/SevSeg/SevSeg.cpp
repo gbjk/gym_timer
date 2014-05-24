@@ -235,6 +235,7 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
       lights[i][6]=1;
       break;
     case '9':
+    case 'g':
       lights[i][0]=1;
       lights[i][1]=1;
       lights[i][2]=1;
