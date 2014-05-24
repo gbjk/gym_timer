@@ -1,4 +1,4 @@
 
-* Fix Editting after alarm editting the rESt
+* Stop rESt from flashing
 * Fix countdown starting too early - wait 1 second always.
 * Enter Programmes

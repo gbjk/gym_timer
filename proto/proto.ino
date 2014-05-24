@@ -234,8 +234,6 @@ void start_alarm(){
 void end_alarm(){
   digitalWrite(BUZZ_PIN, LOW);
   // Reset the default display
-  secs = last_secs;
-  mins = last_mins;
   mode = REST;
   rest_start = millis();
 
@@ -253,8 +251,9 @@ void handle_mode(){
     mode = mode == EDIT ? WAIT : EDIT;
     if (mode == EDIT){
       if (old_mode == REST){
-        mins = last_mins;
         secs = last_secs;
+        mins = last_mins;
+        set_time();
       }
 
       edit_digit = 1;
