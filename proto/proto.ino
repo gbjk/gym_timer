@@ -17,7 +17,8 @@ SevSeg sevseg;
 #define ALARM           4
 #define EDIT            5
 #define EXPECT_PROGRAM  6
-#define REST            6
+#define REST            7
+#define REST_COUNTDOWN  8
 
 #define BUTTON_0     0xFF6897
 #define BUTTON_1     0xFF30CF

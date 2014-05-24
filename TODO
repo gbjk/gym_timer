@@ -1,4 +1,5 @@
 
-* Stop rESt from flashing
+* Sometimes OSSS starts displaying off flash
+* Rest countdown
 * Fix countdown starting too early - wait 1 second always.
 * Enter Programmes
