@@ -5,8 +5,8 @@
 
 SevSeg sevseg;
 
-#define DEFAULT_MINS 6
-#define DEFAULT_SECS 00
+#define DEFAULT_MINS 0
+#define DEFAULT_SECS 3
 
 #define IR_PIN     14
 #define BUZZ_PIN   19
@@ -39,7 +39,7 @@ SevSeg sevseg;
 #define BUTTON_PLUS  0xFF906F
 #define BUTTON_MINUS 0xFFA857
 
-#define ALARM_DURATION 6000
+#define ALARM_DURATION 4000
 
 IRrecv irrecv(IR_PIN);
 decode_results results;
@@ -54,8 +54,10 @@ unsigned long alarm_time;
 unsigned long rest_start;
 
 int expect = 0;
-int secs = DEFAULT_SECS;
 int mins = DEFAULT_MINS;
+int secs = DEFAULT_SECS;
+int last_mins;
+int last_secs;
 const unsigned int powers [4] = {1000,100,10,1};
 
 void setup()
@@ -89,8 +91,10 @@ void loop() {
   if (mils - last_flash > flash_rate){
     flash_state = flash_state ? 0 : 1;
     last_flash = mils;
-    // Only end an alarm as flash state goes down
+
     if (!flash_state){
+
+      // Only end an alarm as flash state goes down
       if (mode == ALARM && mils - alarm_time > ALARM_DURATION){
         end_alarm();
       }
@@ -102,7 +106,7 @@ void loop() {
   }
   else if (mode == EDIT){
     if (!flash_state){
-      // Flash digit 2
+      // Flash digit we're editting
       sevseg.HideNum(edit_digit);
       }
     }
@@ -144,18 +148,24 @@ void loop() {
 void set_time(){
   char display_timer[4];
   sprintf(display_timer, "%2i%02i", mins, secs);
-  sevseg.NewNum(display_timer, 2);
+  sevseg.NewNum(display_timer , 2);
   }
 
 void do_countdown(unsigned long mils){
   if (mils - last_sec >= 1000){
     if (mins == 0 && secs == 0){
       mode = ALARM;
-      mins = 5;
-      secs = 55;
+
       alarm_time = mils;
+
+      char display_timer[4];
+      sprintf(display_timer, "OSSS");
+      sevseg.NewNum(display_timer, 5);
+
       // Ensure we're flashing up
       flash_state = 1;
+
+      return;
     }
     else {
       secs -= 1;
@@ -187,7 +197,7 @@ void handle_key(unsigned long code){
         end_alarm();
         }
       else {
-        mode = mode == COUNTDOWN ? WAIT : COUNTDOWN;
+        start_alarm();
         }
       break;
     case BUTTON_MODE:
@@ -215,11 +225,17 @@ void handle_key(unsigned long code){
   }
 }
 
+void start_alarm(){
+  mode = mode == COUNTDOWN ? WAIT : COUNTDOWN;
+  last_secs = secs;
+  last_mins = mins;
+  }
+
 void end_alarm(){
   digitalWrite(BUZZ_PIN, LOW);
   // Reset the default display
-  secs = DEFAULT_SECS;
-  mins = DEFAULT_MINS;
+  secs = last_secs;
+  mins = last_mins;
   mode = REST;
   rest_start = millis();
 
@@ -233,8 +249,14 @@ void handle_mode(){
     end_alarm();
   }
   else {
+    int old_mode = mode;
     mode = mode == EDIT ? WAIT : EDIT;
     if (mode == EDIT){
+      if (old_mode == REST){
+        mins = last_mins;
+        secs = last_secs;
+      }
+
       edit_digit = 1;
     }
   }
