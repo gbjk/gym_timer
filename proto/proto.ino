@@ -98,33 +98,7 @@ void setup()
 void loop() {
   bool show = mode != OFF;
 
-  unsigned long mils = millis();
-
-  int tick_rate = mode == EDIT ? 400 : 1000;
-
-  if (mils - last_tick > tick_rate){
-
-    if ((mode == REST || mode == WARN) && (mils - warn_start > WARN_DURATION)){
-      if (mode == REST){
-        mode = REST_COUNTDOWN;
-      }
-      else if (mode == WARN){
-        mode = ALARM_COUNTDOWN;
-        digitalWrite(BUZZ_PIN, LOW);
-      }
-    }
-
-    flash_state = flash_state ? 0 : 1;
-    last_tick = mils;
-
-    if (!flash_state){
-
-      // Only end an alarm as flash state goes down
-      if (mode == ALARM && mils - alarm_time > ALARM_DURATION){
-        end_alarm();
-      }
-    }
-  }
+  tick_clock();
 
   if (mode == WARN){
     if (USE_BUZZER){
@@ -177,11 +151,41 @@ void loop() {
   sevseg.ShowAll();
 }
 
+void tick_clock(){
+  unsigned long mils = millis();
+
+  int tick_rate = mode == EDIT ? 400 : 1000;
+
+  if (mils - last_tick > tick_rate){
+
+    if ((mode == REST || mode == WARN) && (mils - warn_start > WARN_DURATION)){
+      if (mode == REST){
+        mode = REST_COUNTDOWN;
+      }
+      else if (mode == WARN){
+        mode = ALARM_COUNTDOWN;
+        digitalWrite(BUZZ_PIN, LOW);
+      }
+    }
+
+    flash_state = flash_state ? 0 : 1;
+    last_tick = mils;
+
+    if (!flash_state){
+
+      // Only end an alarm as flash state goes down
+      if (mode == ALARM && mils - alarm_time > ALARM_DURATION){
+        end_alarm();
+      }
+    }
+  }
+}
+
 void set_time(){
   char display_timer[4];
   sprintf(display_timer, "%2i%02i", mins, secs);
   sevseg.NewNum(display_timer , 2);
-  }
+}
 
 void do_countdown(unsigned long mils){
   if (mils - last_sec >= 1000){

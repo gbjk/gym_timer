@@ -1,5 +1,5 @@
-
-* Double check timers are always starting inclusively
+v1.0
 * Rest countdown
-* Fix countdown starting too early - wait 1 second always.
 * Enter Programmes
+
+* millis will wrap at 50 days
