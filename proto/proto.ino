@@ -178,7 +178,8 @@ unsigned long tick_clock(){
 
 void set_time(){
   char display_timer[4];
-  sprintf(display_timer, "%2i%02i", mins, secs);
+  // Switch back to allowing decimal minutes
+  sprintf(display_timer, "%02i%02i", mins, secs);
   sevseg.NewNum(display_timer , 2);
 }
 
@@ -190,9 +191,7 @@ void do_countdown(unsigned long mils){
 
         alarm_time = mils;
 
-        char display_timer[4];
-        sprintf(display_timer, "OSSS");
-        sevseg.NewNum(display_timer, 5);
+        sevseg.NewNum("0555");
 
         // Ensure we're flashing up
         flash_state = 1;
@@ -273,9 +272,7 @@ void start_alarm_countdown(){
 
   last_tick = last_sec = millis();
 
-  char display_timer[4];
-  sprintf(display_timer, " gO ");
-  sevseg.NewNum(display_timer, 5);
+  sevseg.NewNum(" 9o ");
 
   // Make sure we're starting up, for the buzzer
   flash_state = 1;
@@ -293,9 +290,7 @@ void end_alarm(){
 
   last_tick = last_sec = millis();
 
-  char display_timer[4];
-  sprintf(display_timer, "rESt");
-  sevseg.NewNum(display_timer, 5);
+  sevseg.NewNum("rESt");
   }
 
 void handle_mode(){
@@ -312,14 +307,18 @@ void handle_mode(){
         set_time();
       }
 
-      edit_digit = 1;
+      edit_digit = 0;
     }
   }
 }
 
 void handle_number(int new_number){
   if (mode == EDIT){
-    if (edit_digit < 2){
+    if (edit_digit == 0){
+      int decimal = mins % 10;
+      mins = (10 * new_number) + decimal;
+    }
+    else if (edit_digit == 1){
       mins = new_number;
     }
     else if (edit_digit == 2){

@@ -97,6 +97,7 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
     case 'E':
     case 't':
     case 'r':
+    case 'o':
       break;
     default:
       int num = digit - '0';
