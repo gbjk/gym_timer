@@ -71,7 +71,7 @@ void SevSeg::PrintOutput(){
   for (int i=0;i<4;i++) {
     byte display = digits[i];
     if (hideNum == i){
-      display = display & B00001000;
+      display &= B00001000;
     }
     SPI.transfer( display );
   }
@@ -106,7 +106,7 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
 
     // Set the decimal place lights
     if (decimal_place == i + 1){
-      disp = disp | B00001000;
+      disp |= B00001000;
     }
 
     digits[i] = disp;
