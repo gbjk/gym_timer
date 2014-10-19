@@ -2,13 +2,12 @@
 
 #include <IRremote.h>
 #include <SevSeg.h>
-
-SevSeg sevseg;
+#include <SPI.h>
 
 #define ALARM_DURATION 4000
 #define WARN_DURATION  2000
 
-#define USE_BUZZER 1
+#define USE_BUZZER 0
 
 #define DEFAULT_MINS 0
 #define DEFAULT_SECS 3
@@ -73,18 +72,13 @@ int rest_secs = DEFAULT_REST_SECS;
 
 const unsigned int powers [4] = {1000,100,10,1};
 
+SevSeg sevseg;
+
 void setup()
 {
 
   // Buzzer
   pinMode(BUZZ_PIN, OUTPUT);
-
-  // 7-segment display
-  sevseg.Begin(
-    0,                // Cathode mode
-    10,11,12,13,      // Digit pins D1-D4
-    2,3,4,5,6,7,8,9   // Segment pins 1-7 and Decimal Point
-    );
 
   mode = WAIT;
 
@@ -92,13 +86,15 @@ void setup()
 
   Serial.begin(9600);
 
+  sevseg.begin();
+
   irrecv.enableIRIn(); 
 }
 
 void loop() {
   bool show = mode != OFF;
 
-  tick_clock();
+  unsigned long mils = tick_clock();
 
   if (mode == WARN){
     if (USE_BUZZER){
@@ -133,9 +129,11 @@ void loop() {
     }
   }
 
-  if (show){
-    sevseg.PrintOutput();
+  if (!show){
+    sevseg.NewNum("   ");
   }
+
+  sevseg.PrintOutput();
 
   if (irrecv.decode(&results)) {
     if (results.value != REPEAT){
@@ -144,14 +142,10 @@ void loop() {
     irrecv.resume(); // Receive the next value
   }
 
-  if (show){
-    sevseg.PrintOutput();
-  }
-
   sevseg.ShowAll();
 }
 
-void tick_clock(){
+unsigned long tick_clock(){
   unsigned long mils = millis();
 
   int tick_rate = mode == EDIT ? 400 : 1000;
@@ -179,6 +173,7 @@ void tick_clock(){
       }
     }
   }
+  return mils;
 }
 
 void set_time(){
@@ -350,3 +345,9 @@ void handle_number(int new_number){
   }
 }
 
+/*
+Controls:
+ Mode: Start or Stop editting the time
+ Swap: User Programs
+ Play/Pause: Start countdown or end alarm
+*/
