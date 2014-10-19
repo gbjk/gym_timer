@@ -11,6 +11,7 @@ public:
   //Public Functions
   void begin();
   void NewNum(char display[4], byte decimal_place);
+  void NewNum(const char* display);
 
   void PrintOutput();
 

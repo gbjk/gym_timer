@@ -69,7 +69,11 @@ void SevSeg::PrintOutput(){
   digitalWrite( latch_pin, LOW );
   
   for (int i=0;i<4;i++) {
-    SPI.transfer( digits[i] );
+    byte display = digits[i];
+    if (hideNum == i){
+      display = display & B00001000;
+    }
+    SPI.transfer( display );
   }
 
   digitalWrite( latch_pin, HIGH );
@@ -107,6 +111,10 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
 
     digits[i] = disp;
   }
+}
+void SevSeg::NewNum(const char* display){
+    char* pass_display = const_cast<char*>(display);
+    NewNum(pass_display, 5);
 }
 
 void SevSeg::HideNum(byte digit){
