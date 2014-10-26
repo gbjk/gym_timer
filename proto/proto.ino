@@ -295,7 +295,7 @@ void end_alarm(){
 
   last_tick = last_sec = millis();
 
-  sevseg.NewNum("rESt");
+  sevseg.NewNum("rE5t");
   }
 
 void handle_mode(){
