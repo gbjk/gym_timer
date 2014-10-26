@@ -315,13 +315,20 @@ void handle_mode(){
 void handle_number(int new_number){
   if (mode == EDIT){
     if (edit_digit == 0){
+      if (new_number > 6){
+        new_number = 6;
+        }
       int decimal = mins % 10;
       mins = (10 * new_number) + decimal;
     }
     else if (edit_digit == 1){
-      mins = new_number;
+      int decimal = mins / 10;
+      mins = (10 * decimal ) + new_number;
     }
     else if (edit_digit == 2){
+      if (new_number > 6 && edit_digit % 2 == 0){
+        new_number = 6;
+        }
       int decimal = secs % 10;
       secs = (10 * new_number) + decimal;
     }
@@ -331,7 +338,7 @@ void handle_number(int new_number){
     }
     edit_digit += 1;
     if (edit_digit > 3){
-      edit_digit = 1;
+      edit_digit = 0;
     }
   set_time();
   }
