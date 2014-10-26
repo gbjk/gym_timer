@@ -118,6 +118,7 @@ void loop() {
   }
 
   if (mode == ALARM){
+    sevseg.NewNum("0555");
     if (flash_state){
       if (USE_BUZZER){
         digitalWrite(BUZZ_PIN, HIGH);
@@ -130,7 +131,7 @@ void loop() {
   }
 
   if (!show){
-    sevseg.NewNum("   ");
+    sevseg.NewNum("    ");
   }
 
   sevseg.PrintOutput();
@@ -195,8 +196,6 @@ void do_countdown(unsigned long mils){
         mode = ALARM;
 
         alarm_time = mils;
-
-        sevseg.NewNum("0555");
 
         // Ensure we're flashing up
         flash_state = 1;
