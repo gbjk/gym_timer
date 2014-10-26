@@ -91,13 +91,25 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
     byte disp = blank;
 
     switch (digit){
-    case ' ':
     case 'P':
+      disp = B11110001;
+      break;
     case 'A':
+      disp = B11110101;
+      break;
     case 'E':
+      disp = B11100011;
+      break;
     case 't':
+      disp = B11000011;
+      break;
     case 'r':
+      disp = B10000001;
+      break;
     case 'o':
+      disp = B10000111;
+      break;
+    case ' ':
       break;
     default:
       int num = digit - '0';
