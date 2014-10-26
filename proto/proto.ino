@@ -179,7 +179,12 @@ unsigned long tick_clock(){
 void set_time(){
   char display_timer[4];
   // Switch back to allowing decimal minutes
-  sprintf(display_timer, "%02i%02i", mins, secs);
+  if (mode == EDIT){
+    sprintf(display_timer, "%02i%02i", mins, secs);
+    }
+  else {
+    sprintf(display_timer, "%2i%02i", mins, secs);
+    }
   sevseg.NewNum(display_timer , 2);
 }
 
@@ -304,8 +309,10 @@ void handle_mode(){
       if (old_mode == ALARM_COUNTDOWN || old_mode == ALARM || old_mode == REST || old_mode == REST_COUNTDOWN){
         secs = last_secs;
         mins = last_mins;
-        set_time();
       }
+
+      // Need to run set_time anyway, to make sure we switch to a leading 0
+      set_time();
 
       edit_digit = 0;
     }
