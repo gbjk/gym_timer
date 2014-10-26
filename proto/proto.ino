@@ -277,7 +277,7 @@ void start_alarm_countdown(){
 
   last_tick = last_sec = millis();
 
-  sevseg.NewNum(" 9o ");
+  sevseg.NewNum(" go ");
 
   // Make sure we're starting up, for the buzzer
   flash_state = 1;

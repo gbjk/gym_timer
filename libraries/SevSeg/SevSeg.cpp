@@ -103,6 +103,9 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
     case 't':
       disp = B11000011;
       break;
+    case 'g':
+      disp = B11111010;
+      break;
     case 'r':
       disp = B10000001;
       break;
