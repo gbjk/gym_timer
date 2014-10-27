@@ -251,10 +251,13 @@ void handle_key(unsigned long code){
       mode = EXPECT_PROGRAM;
       break;
 
+    case BUTTON_MUTE:
+      end_alarm();
+      break;
+
     // Currently unused
     case BUTTON_FF:
     case BUTTON_RW:
-    case BUTTON_MUTE:
     case BUTTON_PWR:
       break;
 
