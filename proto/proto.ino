@@ -184,7 +184,7 @@ void set_time(){
     sprintf(display_timer, "%02i%02i", mins, secs);
     }
   else {
-    sprintf(display_timer, "%2i%02i", mins, secs);
+    sprintf(display_timer, "%02i%02i", mins, secs);
     }
   sevseg.NewNum(display_timer , 2);
 }
