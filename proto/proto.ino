@@ -7,7 +7,7 @@
 #define ALARM_DURATION 4000
 #define WARN_DURATION  2000
 
-#define USE_BUZZER 0
+#define USE_BUZZER 1
 
 #define DEFAULT_MINS 0
 #define DEFAULT_SECS 3
