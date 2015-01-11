@@ -10,7 +10,7 @@
 #define USE_BUZZER 1
 
 #define DEFAULT_MINS 0
-#define DEFAULT_SECS 3
+#define DEFAULT_SECS 8
 
 #define DEFAULT_REST_MINS 0
 #define DEFAULT_REST_SECS 5
@@ -51,7 +51,7 @@
 IRrecv irrecv(IR_PIN);
 decode_results results;
 
-int mode = 1;
+int mode = 2;
 bool flash_state;
 byte edit_digit;
 
@@ -255,10 +255,13 @@ void handle_key(unsigned long code){
       end_alarm();
       break;
 
+    case BUTTON_PWR:
+      toggle_power();
+      break;
+
     // Currently unused
     case BUTTON_FF:
     case BUTTON_RW:
-    case BUTTON_PWR:
       break;
 
     default:
@@ -270,6 +273,12 @@ void handle_key(unsigned long code){
     handle_number(new_number);
   }
 }
+
+void toggle_power(){
+  // TODO - Handle any curfrent modes
+  mode = mode == OFF ? WAIT : OFF;
+  set_time();
+  }
 
 void start_alarm_countdown(){
   mode = mode == ALARM_COUNTDOWN ? WAIT : WARN;
