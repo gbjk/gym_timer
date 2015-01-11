@@ -110,7 +110,7 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
       disp = B10000001;
       break;
     case 'o':
-      disp = B10000111;
+      disp = B11110000;
       break;
     case ' ':
       break;
