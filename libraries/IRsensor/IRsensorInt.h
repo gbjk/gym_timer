@@ -13,8 +13,8 @@
  * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
  */
 
-#ifndef IRremoteint_h
-#define IRremoteint_h
+#ifndef IRsensorint_h
+#define IRsensorint_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include <Arduino.h>
@@ -179,7 +179,7 @@
 int MATCH(int measured, int desired) {return measured >= TICKS_LOW(desired) && measured <= TICKS_HIGH(desired);}
 int MATCH_MARK(int measured_ticks, int desired_us) {return MATCH(measured_ticks, (desired_us + MARK_EXCESS));}
 int MATCH_SPACE(int measured_ticks, int desired_us) {return MATCH(measured_ticks, (desired_us - MARK_EXCESS));}
-// Debugging versions are in IRremote.cpp
+// Debugging versions are in IRsensor.cpp
 #endif
 
 // receiver states
@@ -199,7 +199,7 @@ typedef struct {
 } 
 irparams_t;
 
-// Defined in IRremote.cpp
+// Defined in IRsensor.cpp
 extern volatile irparams_t irparams;
 
 // IR detector output is active low

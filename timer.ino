@@ -1,6 +1,13 @@
-// Prototype gym timer
+/* Arduino gym timer
+ * 
+ * Specifically targetted BJJ round timer.
+ *
+ * See LICENSE.txt for license information.
+ *
+ * Copyright Gareth Kirwan <gbjk@thermeon.com>.
+*/
 
-#include <IRremote.h>
+#include <IRsensor.h>
 #include <SevSeg.h>
 #include <SPI.h>
 

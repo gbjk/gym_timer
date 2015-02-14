@@ -16,8 +16,8 @@
  * JVC and Panasonic protocol added by Kristian Lauszus (Thanks to zenwheel and other people at the original blog post)
  */
 
-#include "IRremote.h"
-#include "IRremoteInt.h"
+#include "IRsensor.h"
+#include "IRsensorInt.h"
 
 // Provides ISR
 #include <avr/interrupt.h>
@@ -25,7 +25,7 @@
 volatile irparams_t irparams;
 
 // These versions of MATCH, MATCH_MARK, and MATCH_SPACE are only for debugging.
-// To use them, set DEBUG in IRremoteInt.h
+// To use them, set DEBUG in IRsensorInt.h
 // Normally macros are used for efficiency
 #ifdef DEBUG
 int MATCH(int measured, int desired) {
