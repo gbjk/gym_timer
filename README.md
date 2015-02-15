@@ -2,6 +2,8 @@
 
 This project is aimed at allowing easy access to a easy to build arduino based round timer.
 
+See [Documentation](DOCUMENTATION.md) for usage instructions.
+
 ## Features
 
 * IR remote controlled

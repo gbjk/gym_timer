@@ -99,6 +99,26 @@ void setup()
 }
 
 void loop() {
+
+  bool show = loop_for_mode();
+
+  if (!show){
+    sevseg.NewNum("    ");
+  }
+
+  sevseg.PrintOutput();
+
+  if (irrecv.decode(&results)) {
+    if (results.value != REPEAT){
+      handle_key(results.value);
+    }
+    irrecv.resume(); // Receive the next value
+  }
+
+  sevseg.ShowAll();
+}
+
+bool loop_for_mode(){
   bool show = mode != OFF;
 
   unsigned long mils = tick_clock();
@@ -137,20 +157,7 @@ void loop() {
     }
   }
 
-  if (!show){
-    sevseg.NewNum("    ");
-  }
-
-  sevseg.PrintOutput();
-
-  if (irrecv.decode(&results)) {
-    if (results.value != REPEAT){
-      handle_key(results.value);
-    }
-    irrecv.resume(); // Receive the next value
-  }
-
-  sevseg.ShowAll();
+  return show;
 }
 
 unsigned long tick_clock(){
@@ -243,12 +250,7 @@ void handle_key(unsigned long code){
     case BUTTON_8:     new_number = 8; break;
     case BUTTON_9:     new_number = 9; break;
     case BUTTON_PLAY:
-      if (mode == ALARM){
-        end_alarm();
-        }
-      else {
-        start_alarm_countdown();
-        }
+      handle_play();
       break;
     case BUTTON_MODE:
       handle_mode();
@@ -263,7 +265,7 @@ void handle_key(unsigned long code){
       break;
 
     case BUTTON_PWR:
-      toggle_power();
+      handle_power();
       break;
 
     // Currently unused
@@ -281,39 +283,19 @@ void handle_key(unsigned long code){
   }
 }
 
-void toggle_power(){
-  // TODO - Handle any curfrent modes
+void handle_play(){
+  if (mode == ALARM){
+    end_alarm();
+    }
+  else {
+    start_alarm_countdown();
+    }
+  }
+
+void handle_power(){
+  // TODO - Handle any current modes
   mode = mode == OFF ? WAIT : OFF;
   set_time();
-  }
-
-void start_alarm_countdown(){
-  mode = mode == ALARM_COUNTDOWN ? WAIT : WARN;
-
-  last_secs = secs;
-  last_mins = mins;
-
-  last_tick = last_sec = millis();
-
-  sevseg.NewNum(" go ");
-
-  // Make sure we're starting up, for the buzzer
-  flash_state = 1;
-  }
-
-void end_alarm(){
-  digitalWrite(BUZZ_PIN, LOW);
-  // Reset the default display
-  mode = REST;
-  warn_start = millis();
-
-  // TODO, real values
-  mins = DEFAULT_REST_MINS;
-  secs = DEFAULT_REST_SECS;
-
-  last_tick = last_sec = millis();
-
-  sevseg.NewNum("rE5t");
   }
 
 void handle_mode(){
@@ -376,9 +358,32 @@ void handle_number(int new_number){
   }
 }
 
-/*
-Controls:
- Mode: Start or Stop editting the time
- Swap: User Programs
- Play/Pause: Start countdown or end alarm
-*/
+void start_alarm_countdown(){
+  mode = mode == ALARM_COUNTDOWN ? WAIT : WARN;
+
+  last_secs = secs;
+  last_mins = mins;
+
+  last_tick = last_sec = millis();
+
+  sevseg.NewNum(" go ");
+
+  // Make sure we're starting up, for the buzzer
+  flash_state = 1;
+  }
+
+void end_alarm(){
+  digitalWrite(BUZZ_PIN, LOW);
+
+  // Reset the default display
+  mode = REST;
+  warn_start = millis();
+
+  // TODO, real values
+  mins = DEFAULT_REST_MINS;
+  secs = DEFAULT_REST_SECS;
+
+  last_tick = last_sec = millis();
+
+  sevseg.NewNum("rE5t");
+  }
