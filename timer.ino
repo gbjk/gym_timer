@@ -238,40 +238,33 @@ void do_countdown(unsigned long mils){
 
 void handle_key(unsigned long code){
   int new_number = 10;
+
+  if (mode == OFF && code != BUTTON_PWR){
+    return;
+    }
+
   switch (code){
-    case BUTTON_0:     new_number = 0; break;
-    case BUTTON_1:     new_number = 1; break;
-    case BUTTON_2:     new_number = 2; break;
-    case BUTTON_3:     new_number = 3; break;
-    case BUTTON_4:     new_number = 4; break;
-    case BUTTON_5:     new_number = 5; break;
-    case BUTTON_6:     new_number = 6; break;
-    case BUTTON_7:     new_number = 7; break;
-    case BUTTON_8:     new_number = 8; break;
-    case BUTTON_9:     new_number = 9; break;
-    case BUTTON_PLAY:
-      handle_play();
-      break;
-    case BUTTON_MODE:
-      handle_mode();
-      break;
-
-    case BUTTON_SWAP:
-      mode = EXPECT_PROGRAM;
-      break;
-
-    case BUTTON_MUTE:
-      end_alarm();
-      break;
-
-    case BUTTON_PWR:
-      handle_power();
-      break;
+    case BUTTON_PWR:  handle_power();   break;
+    case BUTTON_PLAY: handle_play();    break;
+    case BUTTON_MODE: handle_mode();    break;
+    case BUTTON_SWAP: handle_swap();    break;
+    case BUTTON_MUTE: handle_mute();    break;
 
     // Currently unused
-    case BUTTON_FF:
-    case BUTTON_RW:
-      break;
+    case BUTTON_FF:                     break;
+    case BUTTON_RW:                     break;
+
+    // Numbers
+    case BUTTON_0:     new_number = 0;  break;
+    case BUTTON_1:     new_number = 1;  break;
+    case BUTTON_2:     new_number = 2;  break;
+    case BUTTON_3:     new_number = 3;  break;
+    case BUTTON_4:     new_number = 4;  break;
+    case BUTTON_5:     new_number = 5;  break;
+    case BUTTON_6:     new_number = 6;  break;
+    case BUTTON_7:     new_number = 7;  break;
+    case BUTTON_8:     new_number = 8;  break;
+    case BUTTON_9:     new_number = 9;  break;
 
     default:
       Serial.print("Other button: ");
@@ -282,6 +275,14 @@ void handle_key(unsigned long code){
     handle_number(new_number);
   }
 }
+
+void handle_mute(){
+  end_alarm();
+  }
+
+void handle_swap(){
+  mode = EXPECT_PROGRAM;
+  }
 
 void handle_play(){
   if (mode == ALARM){
