@@ -7,6 +7,8 @@
  * Copyright Gareth Kirwan <gbjk@thermeon.com>.
 */
 
+#define DEBUG 1
+
 #include <IRsensor.h>
 #include <SevSeg.h>
 #include <SPI.h>
@@ -49,6 +51,10 @@ decode_results results;
 
 int mode  = WAIT;
 
+#define ALARM_PHASE 1
+#define REST_PHASE  3
+#define PHASES      4
+
 struct timer_phase {
   int             beep_duration;  // How long to beep for.
   bool            show_time;      // Whether to show the time, or the display char
@@ -59,14 +65,10 @@ struct timer_phase {
   unsigned long   end_beep;
 };
 
-#define ALARM_PHASE 1
-#define REST_PHASE  3
-#define PHASES      4
-
 struct timer_phase timer_phases[PHASES] = {
   { 1, 0, " g0 ", 0, 1 },
   { 0, 1, "",     0, 8 },     // Default to 0.08 timer
-  { 3, 0, "rEst", 0, 3 },
+  { 3, 0, "rESt", 0, 3 },
   { 0, 1, "" },               // Default to 0.05 rest
   };
 
@@ -78,8 +80,7 @@ bool toggle = 0;
 byte edit_digit;
 
 unsigned long time;
-unsigned long last_tick;
-unsigned long last_sec;
+unsigned long last_tick; // Whatever the relevant ticks are, MODE context specific
 
 const unsigned int powers [4] = {1000,100,10,1};
 
@@ -94,7 +95,9 @@ void setup(){
 
   set_time();
 
-  Serial.begin(9600);
+  if (DEBUG){
+    Serial.begin(9600);
+    }
 
   sevseg.begin();
 
@@ -102,6 +105,9 @@ void setup(){
   }
 
 void loop(){
+
+  // Will need this for handle_key events
+  time = millis();
 
   loop_for_mode();
 
@@ -125,32 +131,25 @@ void loop_for_mode(){
     }
 
   if (mode == TIMER){
-    do_timer();
+    timer_loop();
     }
   else if (mode == EDIT){
-/*
-    if (!flash_state){
-      // Flash digit we're editting
-      sevseg.HideNum(edit_digit);
-      }
-*/
+    edit_loop();
     }
 }
 
-void do_timer(){
-  time = millis();
-
+void timer_loop(){
   if (time > current_phase.end_time){ 
     switch_phase();
     }
   else {
-    if (time - last_sec >= 1000){
+    if (time - last_tick >= 1000){
       current_phase.secs -= 1;
       if (current_phase.secs < 0){
         current_phase.mins -= 1;
         current_phase.secs = 59;
         }
-      last_sec = time;
+      last_tick = time;
 
       if (time > current_phase.end_beep){
         if (toggle){
@@ -180,16 +179,28 @@ void switch_phase(){
   if (current_phase_index >= PHASES){
     current_phase_index = 0;
     }
-  current_phase = timer_phases[ current_phase_index ];
 
   start_phase();
   }
 
 void start_phase(){
+  current_phase = timer_phases[ current_phase_index ];
+
   current_phase.end_time = time + ( ( (current_phase.mins * 60) + current_phase.secs ) * 1000 );
   if (current_phase.beep_duration){
     current_phase.end_beep = time + ( current_phase.beep_duration * 1000 );
     }
+
+  last_tick = time;
+
+  if (Serial){
+    Serial.print("Starting phase: ");
+    Serial.println(current_phase_index);
+
+    Serial.print("End at: ");
+    Serial.println(current_phase.end_time);
+    }
+
   toggle = 1;
   }
 
@@ -202,7 +213,8 @@ void end_phase(){
 void start_timer(){
   mode = TIMER;
 
-  current_phase = timer_phases[ 0 ];
+  current_phase_index = 0;
+
   start_phase();
   }
 
@@ -217,7 +229,21 @@ void set_time(){
   // Switch back to allowing decimal minutes
   sprintf(display_timer, "%02i%02i", current_phase.mins, current_phase.secs);
   sevseg.NewNum(display_timer , 2);
-}
+  }
+
+void edit_loop(){
+  // Edit flash rate
+  if (time - last_tick >= 500){
+    last_tick = time;
+
+    if (!toggle){
+      // Flash digit we're editting
+      sevseg.HideNum(edit_digit);
+      }
+    toggle = toggle ? 0 : 1;
+    }
+
+  }
 
 void handle_key(unsigned long code){
   int new_number = 10;
@@ -250,8 +276,10 @@ void handle_key(unsigned long code){
     case BUTTON_9:     new_number = 9;  break;
 
     default:
-      Serial.print("Other button: ");
-      Serial.println(code, HEX);
+      if (Serial){
+        Serial.print("Other button: ");
+        Serial.println(code, HEX);
+        }
   }
 
   if (new_number < 10){

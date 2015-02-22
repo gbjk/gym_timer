@@ -1,3 +1,8 @@
+= Bugs
+* reST doesnt display properly
+* rest shows when you first start
+
+= Outstanding
 * Starting the timer should show the configured time
 * Power button should stop existing modes fully
 
