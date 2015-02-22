@@ -1,4 +1,4 @@
-# Arduino Gym Round Timer
+# RoundBuddy project
 
 This project is aimed at allowing easy access to a easy to build arduino based round timer.
 

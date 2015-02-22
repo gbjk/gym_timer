@@ -1,35 +1,32 @@
-# Operating instructions
+# RoundBuddy Operating instructions
 
-* TODO
+* The RoundBuddy has 4 modes: *standby*, *edit*, *countdown* and *off*
+* The *countdown* has two phases: *Round time*, and *Rest time*. Both are configurable
+* *Rest time* has a maximum of 59 seconds
+* RoundBuddy starts in *standby* mode, which displays the current *Round time*
 
-Rest phase is seconds
+### Edit
+* To edit the timers, press the __mode__ button in *standby* mode
+* First the *Round time* is displayed
+* The current digit flashes. Enter a number to replace it, and the next number will flash
+* Or press **|**◀◀ or ▶▶**|** to move left or right
+* After you have editted the last digit of *Round time*, the *Rest time* will display for editting
+* You can press **|**◀◀ or ▶▶**|** on the first or last digit to move between *Round time* and *Rest time* too
+* To exit *edit* mode, press the __mode__ button to return to *standby*, or ►**||** to start the *countdown*
 
-<< >> in edit
+### Countdown
+* To start the countdown press ►**||**
+* **go** displays for 2 seconds, with one beep
+* *Round time* then starts
+* When the countdown is complete **done** will display for 6 seconds, with 3 beeps
+* **rest** will display for 3 seconds
+* *Rest time* will then countdown
+* The timer will continue to go from *Round time* to *Rest time* until stopped or paused
+* Press ►**||** to pause the timer, and press it again to resume the timer
+* Whilst paused, the display will flash
+* To stop the *countdown*, press __mode__ button
 
-# IR remote Buttons
-
-* **Power**  
-Put the unit to sleep
-* **Mode**  
-  * In timer countdown or pause: leave timer and return to standby
-  * In standby: Start editting the timer
-  * In Edit: Leave edit and return to standby
-* **Play/Pause**
-  * In standby mode: Start the timer countdown
-  * In timer countdown: Pause the countdown
-  * In pause countdown: Resume the countdown
-
-# Sequence of timer
-
-Once the timer is started:
-* **go** displays for 1 second, with one beep
-* The timer starts showing your configured round time, and countdown begins
-* When the timer reaches zero, **rESt** appears for 3 seconds, and the timer beeps 3 times
-* The rest timer starts
-* The timer restarts from step 1.
-
-# Power
-
-The power button on the remote turns off the display and stops the timer, which is normally good enough.  
-The unit has no "total off" button. Simply unplug it from the power.
-
+### Off
+* To turn RoundBuddy *off*, press the power button
+* RoundBuddy still consumes power when turned *off*
+* It is recommended you turn RoundBuddy off at the power socket for extended periods of inactivity
