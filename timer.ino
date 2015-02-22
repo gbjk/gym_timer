@@ -67,7 +67,7 @@ struct timer_phase {
 };
 
 struct timer_phase timer_phases[PHASES] = {
-  { 1, 0, " go ", 0, 1 },
+  { 1, 0, " go ", 0, 2 },
   { 0, 1, "",     0, 8 },     // Default to 0.08 timer
   { 3, 0, "d0nE", 0, 6 },
   { 0, 0, "rE5t", 0, 3 },
@@ -91,7 +91,9 @@ SevSeg sevseg;
 void setup(){
 
   // Buzzer
-  pinMode(BUZZ_PIN, OUTPUT);
+  if (USE_BUZZER){
+    pinMode(BUZZ_PIN, OUTPUT);
+    }
 
   mode = WAIT;
 
@@ -215,7 +217,8 @@ void start_phase(){
   }
 
 void continue_phase(){
-  current_phase.end_time = time + ( ( (current_phase.mins * 60) + current_phase.secs ) * 1000 );
+  current_phase.end_time = time + (((current_phase.mins * 60ul) + current_phase.secs) * 1000ul);
+
   if (current_phase.beeps){
     // Start the beep up
     digitalWrite(BUZZ_PIN, HIGH);
@@ -231,6 +234,9 @@ void continue_phase(){
       Serial.print(">  ");
       Serial.println(current_phase.display);
       }
+
+    Serial.print("Current time: ");
+    Serial.println(time);
 
     Serial.print("End at: ");
     Serial.println(current_phase.end_time);
@@ -248,9 +254,15 @@ void end_phase(){
 void set_time(){
   char display_timer[4];
 
-  // Switch back to allowing decimal minutes
-  sprintf(display_timer, "%02i%02i", current_phase.mins, current_phase.secs);
-  sevseg.NewNum(display_timer , 2);
+  if (current_phase_index == REST_PHASE){
+    sprintf(display_timer, "r %02i", current_phase.secs);
+    sevseg.NewNum(display_timer, 5);
+    }
+  else {
+    sprintf(display_timer, "%02i%02i", current_phase.mins, current_phase.secs);
+    sevseg.NewNum(display_timer, 2);
+    }
+
   }
 
 // Key handlers

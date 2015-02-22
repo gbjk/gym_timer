@@ -2,6 +2,8 @@
 
 * TODO
 
+Rest phase is seconds
+
 # IR remote Buttons
 
 * **Power**  

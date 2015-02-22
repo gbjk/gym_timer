@@ -2,7 +2,7 @@
 * millis will wrap at 50
 
 = Features
-* Need a reset
 * Skip rest
-* Skip back
 * Configurable rest
+* Show r before rest intervals
+* Flash everything when paused
