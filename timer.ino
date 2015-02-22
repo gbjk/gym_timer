@@ -463,9 +463,29 @@ void edit_number(int new_number){
 
   edit_digit += 1;
 
-  if (edit_digit > 3){
-    edit_digit = 0;
-    }
-
   set_time();
+
+  if (edit_digit > 3){
+    // Copy whatever we've just editted over
+    timer_phases[ current_phase_index ] = current_phase;
+
+    // Switch between editting alarm and rest
+    current_phase_index = current_phase_index == ALARM_PHASE ? REST_PHASE : ALARM_PHASE;
+    current_phase = timer_phases[ current_phase_index ];
+
+    if (current_phase_index == REST_PHASE){
+      edit_digit = 2;
+      }
+    else {
+      edit_digit = 0;
+      }
+
+    // Show the user what they just did before switching modes
+    sevseg.ShowAll();
+    sevseg.PrintOutput();
+    delay(1000);
+
+    // Show the new time from the new phase
+    set_time();
+    }
   }
