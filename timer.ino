@@ -68,8 +68,8 @@ struct timer_phase {
 struct timer_phase timer_phases[PHASES] = {
   { 1, 0, " go ", 0, 1 },
   { 0, 1, "",     0, 8 },     // Default to 0.08 timer
-  { 3, 0, "donE", 0, 6 },
-  { 0, 0, "rESt", 0, 3 },
+  { 3, 0, "d0nE", 0, 6 },
+  { 0, 0, "rE5t", 0, 3 },
   { 0, 1, "",     0, 5 },     // Default to 0.05 rest
   };
 
@@ -321,17 +321,39 @@ void handle_play(){
   }
 
 void handle_power(){
+  if (mode == TIMER){
+    end_timer();
+    }
+
   mode = mode == OFF ? WAIT : OFF;
   if (mode == WAIT){
     enter_wait();
     }
+  else {
+    enter_off();
+    }
+  }
+
+void enter_off(){
+  sevseg.NewNum("    ");
   }
 
 void enter_wait(){
   set_time();
   toggle = 1;
-  digitalWrite(BUZZ_PIN, LOW);
   mode = WAIT;
+  }
+
+void enter_edit(){
+  current_phase = timer_phases[ ALARM_PHASE ];
+
+  // Need to run set_time anyway, to make sure we switch to a leading 0
+  set_time();
+
+  last_tick = time;
+  toggle    = 1;
+
+  edit_digit = 0;
   }
 
 void handle_mode(){
@@ -342,12 +364,7 @@ void handle_mode(){
   else {
     mode = mode == EDIT ? WAIT : EDIT;
     if (mode == EDIT){
-      current_phase = timer_phases[ ALARM_PHASE ];
-
-      // Need to run set_time anyway, to make sure we switch to a leading 0
-      set_time();
-
-      edit_digit = 0;
+      enter_edit();
       }
     }
   }

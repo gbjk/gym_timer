@@ -115,8 +115,8 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
     case 'g':
       disp = B11110110;
       break;
-    case 'o':
-      disp = B1110000;
+    case 'o': // Top segment o
+      disp = B11110000;
       break;
     case 'n':
       disp = B10000101;
