@@ -23,6 +23,7 @@
 #define WAIT            2
 #define EDIT            3
 #define TIMER           4
+#define PAUSE           5
 
 #define EXPECT_PROGRAM  7
 
@@ -105,6 +106,7 @@ void setup(){
   irrecv.enableIRIn(); 
   }
 
+// Loop functions
 void loop(){
 
   // Will need this for handle_key events
@@ -120,17 +122,10 @@ void loop(){
       }
     irrecv.resume(); // Receive the next value
     }
-
-  sevseg.ShowAll();
   }
 
 // See DOCUMENTATION.md
 void loop_for_mode(){
-
-  if (mode == OFF || mode == WAIT){
-    return;
-    }
-
   if (mode == TIMER){
     timer_loop();
     }
@@ -182,6 +177,25 @@ void timer_loop(){
     }
   }
 
+void edit_loop(){
+  // Edit flash rate
+  if (time - last_tick >= 500){
+
+    last_tick = time;
+
+    if (!toggle){
+      // Flash digit we're editting
+      sevseg.HideNum(edit_digit);
+      }
+    else {
+      sevseg.ShowAll();
+      }
+
+    toggle = toggle ? 0 : 1;
+    }
+  }
+
+// Timer functions
 void switch_phase(){ 
   end_phase();
 
@@ -194,8 +208,13 @@ void switch_phase(){
   }
 
 void start_phase(){
+  // Copy the phase config over
   current_phase = timer_phases[ current_phase_index ];
 
+  continue_phase();
+  }
+
+void continue_phase(){
   current_phase.end_time = time + ( ( (current_phase.mins * 60) + current_phase.secs ) * 1000 );
   if (current_phase.beeps){
     // Start the beep up
@@ -226,19 +245,6 @@ void end_phase(){
   toggle = 0;
   }
 
-void start_timer(){
-  mode = TIMER;
-
-  current_phase_index = 0;
-
-  start_phase();
-  }
-
-void end_timer(){
-  mode = WAIT;
-  end_phase();
-  }
-
 void set_time(){
   char display_timer[4];
 
@@ -247,20 +253,7 @@ void set_time(){
   sevseg.NewNum(display_timer , 2);
   }
 
-void edit_loop(){
-  // Edit flash rate
-  if (time - last_tick >= 500){
-    last_tick = time;
-
-    if (!toggle){
-      // Flash digit we're editting
-      sevseg.HideNum(edit_digit);
-      }
-    toggle = toggle ? 0 : 1;
-    }
-
-  }
-
+// Key handlers
 void handle_key(unsigned long code){
   int new_number = 10;
 
@@ -304,29 +297,32 @@ void handle_key(unsigned long code){
 }
 
 void handle_mute(){
-  end_timer();
+  // No current handling for mute
   }
 
 void handle_swap(){
-  mode = EXPECT_PROGRAM;
+  // Programming not supported yet
+  // mode = EXPECT_PROGRAM;
   }
 
 void handle_play(){
+  leave_current_mode();
+
   if (mode == TIMER){
-    end_timer();
+    enter_pause();
+    }
+  else if (mode == PAUSE){
+    resume_timer();
     }
   else {
-    start_timer();
+    enter_timer();
     }
   }
 
 void handle_power(){
-  if (mode == TIMER){
-    end_timer();
-    }
+  leave_current_mode();
 
-  mode = mode == OFF ? WAIT : OFF;
-  if (mode == WAIT){
+  if (mode == OFF){
     enter_wait();
     }
   else {
@@ -334,38 +330,14 @@ void handle_power(){
     }
   }
 
-void enter_off(){
-  sevseg.NewNum("    ");
-  }
-
-void enter_wait(){
-  set_time();
-  toggle = 1;
-  mode = WAIT;
-  }
-
-void enter_edit(){
-  current_phase = timer_phases[ ALARM_PHASE ];
-
-  // Need to run set_time anyway, to make sure we switch to a leading 0
-  set_time();
-
-  last_tick = time;
-  toggle    = 1;
-
-  edit_digit = 0;
-  }
-
 void handle_mode(){
-  if (mode == TIMER){
-    end_timer();
-    enter_wait();
+  leave_current_mode();
+
+  if (mode == WAIT){
+    enter_edit();
     }
   else {
-    mode = mode == EDIT ? WAIT : EDIT;
-    if (mode == EDIT){
-      enter_edit();
-      }
+    enter_wait();
     }
   }
 
@@ -384,6 +356,76 @@ void handle_number(int new_number){
 */
   }
 
+// Change of state functions
+void leave_current_mode(){
+  switch (mode){
+    case PAUSE:
+    case TIMER:       leave_timer();    break;
+    case EDIT:        leave_edit();     break;
+    }
+  }
+
+void enter_off(){
+  mode = OFF;
+  sevseg.NewNum("    ");
+  }
+
+void enter_wait(){
+  mode = WAIT;
+  current_phase_index = ALARM_PHASE;
+  current_phase = timer_phases[ current_phase_index ];
+  set_time();
+  toggle = 1;
+  }
+
+void leave_edit(){
+  timer_phases[ current_phase_index ] = current_phase;
+  sevseg.ShowAll();
+  }
+
+void enter_edit(){
+  current_phase_index = ALARM_PHASE;
+  current_phase = timer_phases[ current_phase_index ];
+
+  // Need to run set_time anyway, to make sure we switch to a leading 0
+  set_time();
+
+  // Make sure we'll immediately flash down
+  last_tick = time - 1000;
+
+  edit_digit = 0;
+  toggle    = 1;
+
+  mode = EDIT;
+  }
+
+void resume_timer(){
+  mode = TIMER;
+
+  sevseg.ShowAll();
+
+  continue_phase();
+  }
+
+void enter_timer(){
+  mode = TIMER;
+
+  sevseg.ShowAll();
+
+  current_phase_index = 0;
+  start_phase();
+  }
+
+void leave_timer(){
+  end_phase();
+  }
+
+void enter_pause(){
+  mode = PAUSE;
+  end_phase();
+  }
+
+// Edit functions
 void edit_number(int new_number){
   // Nothing greater than 6 in decimal minutes or seconds
   if (new_number > 6 && edit_digit % 2 == 0){

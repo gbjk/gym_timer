@@ -1,6 +1,4 @@
 = Bugs
-* Edit doesnt flash
-* Pause doesnt continue
 * millis will wrap at 50
 
 = Features
