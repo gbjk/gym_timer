@@ -1,6 +1,6 @@
 = Bugs
-* reST doesnt display properly
-* rest shows when you first start
+* First been is very short
+* go -> rest doesnt work very well
 
 = Outstanding
 * Starting the timer should show the configured time

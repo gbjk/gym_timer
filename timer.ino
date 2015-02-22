@@ -52,11 +52,11 @@ decode_results results;
 int mode  = WAIT;
 
 #define ALARM_PHASE 1
-#define REST_PHASE  3
-#define PHASES      4
+#define REST_PHASE  4
+#define PHASES      5
 
 struct timer_phase {
-  int             beep_duration;  // How long to beep for.
+  int             beeps;          // How many beeps
   bool            show_time;      // Whether to show the time, or the display char
   char            display[5];
   int             mins;
@@ -66,10 +66,11 @@ struct timer_phase {
 };
 
 struct timer_phase timer_phases[PHASES] = {
-  { 1, 0, " g0 ", 0, 1 },
+  { 1, 0, " go ", 0, 1 },
   { 0, 1, "",     0, 8 },     // Default to 0.08 timer
-  { 3, 0, "rESt", 0, 3 },
-  { 0, 1, "" },               // Default to 0.05 rest
+  { 3, 0, "donE", 0, 6 },
+  { 0, 0, "rESt", 0, 3 },
+  { 0, 1, "",     0, 5 },     // Default to 0.05 rest
   };
 
 int current_phase_index = ALARM_PHASE;
@@ -151,16 +152,25 @@ void timer_loop(){
         }
       last_tick = time;
 
-      if (time > current_phase.end_beep){
+      if (current_phase.beeps){
         if (toggle){
+          // We've done the beep, so decrease count
+          current_phase.beeps--;
           digitalWrite(BUZZ_PIN, LOW);
-          toggle = 0;
           }
-        }
-      else {
-        digitalWrite(BUZZ_PIN, toggle ? HIGH : LOW);
+        else {
+          // Don't decrease the beep count until we're done beeping, so we stop lhe last beep
+          digitalWrite(BUZZ_PIN, HIGH);
+          }
         toggle = toggle ? 0 : 1;
         }
+
+      if (Serial && current_phase.show_time){
+          Serial.print(">  ");
+          Serial.print(current_phase.mins);
+          Serial.print(".");
+          Serial.println(current_phase.secs);
+          }
       }
     }
 
@@ -187,8 +197,9 @@ void start_phase(){
   current_phase = timer_phases[ current_phase_index ];
 
   current_phase.end_time = time + ( ( (current_phase.mins * 60) + current_phase.secs ) * 1000 );
-  if (current_phase.beep_duration){
-    current_phase.end_beep = time + ( current_phase.beep_duration * 1000 );
+  if (current_phase.beeps){
+    // Start the beep up
+    digitalWrite(BUZZ_PIN, HIGH);
     }
 
   last_tick = time;
@@ -196,6 +207,11 @@ void start_phase(){
   if (Serial){
     Serial.print("Starting phase: ");
     Serial.println(current_phase_index);
+
+    if (!current_phase.show_time){
+      Serial.print(">  ");
+      Serial.println(current_phase.display);
+      }
 
     Serial.print("End at: ");
     Serial.println(current_phase.end_time);
@@ -207,7 +223,7 @@ void start_phase(){
 void end_phase(){
   // Make sure we're not flash down, buzzering, etc
   digitalWrite(BUZZ_PIN, LOW);
-  toggle = 1;
+  toggle = 0;
   }
 
 void start_timer(){

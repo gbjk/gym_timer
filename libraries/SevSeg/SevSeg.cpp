@@ -1,5 +1,17 @@
 /*
  7 segment driver through spi with continuous power
+
+ Segments Bytes are reversed in byte order, so going from right to left: B87654321
+     --6--
+    |     |
+    7     5
+    |     |
+    |--8--|
+    |     |
+    1     3
+    |     |
+     --2--  .4
+
  */
 
 #include "SevSeg.h"
@@ -91,26 +103,32 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
     byte disp = blank;
 
     switch (digit){
-    case 'P':
-      disp = B11110001;
-      break;
     case 'A':
       disp = B11110101;
+      break;
+    case 'd':
+      disp = B10010111;
       break;
     case 'E':
       disp = B11100011;
       break;
-    case 't':
-      disp = B11000011;
-      break;
     case 'g':
       disp = B11110110;
+      break;
+    case 'o':
+      disp = B1110000;
+      break;
+    case 'n':
+      disp = B10000101;
+      break;
+    case 'P':
+      disp = B11110001;
       break;
     case 'r':
       disp = B10000001;
       break;
-    case 'o':
-      disp = B11110000;
+    case 't':
+      disp = B11000011;
       break;
     case ' ':
       break;
