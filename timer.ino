@@ -281,8 +281,8 @@ void handle_key(unsigned long code){
     case BUTTON_MUTE: handle_mute();    break;
 
     // Currently unused
-    case BUTTON_FF:                     break;
-    case BUTTON_RW:                     break;
+    case BUTTON_FF:   handle_ff();      break;
+    case BUTTON_RW:   handle_rw();      break;
 
     // Numbers
     case BUTTON_0:     new_number = 0;  break;
@@ -350,6 +350,28 @@ void handle_mode(){
     }
   else {
     enter_wait();
+    }
+  }
+
+void handle_ff(){
+  if (mode == EDIT){
+    edit_digit += 1;
+    if (edit_digit > 3){
+      switch_edit_phase();
+      }
+    }
+  }
+
+void handle_rw(){
+  if (mode == EDIT){
+    if ((current_phase_index == ALARM_PHASE && edit_digit == 0) ||
+        (current_phase_index == REST_PHASE && edit_digit == 2)){
+      switch_edit_phase();
+      edit_digit = 3;
+      }
+    else {
+      edit_digit -= 1;
+      }
     }
   }
 
@@ -466,26 +488,30 @@ void edit_number(int new_number){
   set_time();
 
   if (edit_digit > 3){
-    // Copy whatever we've just editted over
-    timer_phases[ current_phase_index ] = current_phase;
-
-    // Switch between editting alarm and rest
-    current_phase_index = current_phase_index == ALARM_PHASE ? REST_PHASE : ALARM_PHASE;
-    current_phase = timer_phases[ current_phase_index ];
-
-    if (current_phase_index == REST_PHASE){
-      edit_digit = 2;
-      }
-    else {
-      edit_digit = 0;
-      }
-
     // Show the user what they just did before switching modes
     sevseg.ShowAll();
     sevseg.PrintOutput();
     delay(1000);
 
-    // Show the new time from the new phase
-    set_time();
+    switch_edit_phase();
     }
+  }
+
+void switch_edit_phase(){
+  // Copy whatever we've just editted over
+  timer_phases[ current_phase_index ] = current_phase;
+
+  // Switch between editting alarm and rest
+  current_phase_index = current_phase_index == ALARM_PHASE ? REST_PHASE : ALARM_PHASE;
+  current_phase = timer_phases[ current_phase_index ];
+
+  if (current_phase_index == REST_PHASE){
+    edit_digit = 2;
+    }
+  else {
+    edit_digit = 0;
+    }
+
+  // Show the new time from the new phase
+  set_time();
   }

@@ -4,6 +4,8 @@
 
 Rest phase is seconds
 
+<< >> in edit
+
 # IR remote Buttons
 
 * **Power**  
