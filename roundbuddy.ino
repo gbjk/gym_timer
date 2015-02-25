@@ -82,7 +82,7 @@ bool toggle = 0;
 byte edit_digit;
 
 unsigned long time;
-unsigned long last_tick; // Whatever the relevant ticks are, MODE context specific
+unsigned long last_tick = 0; // Whatever the relevant ticks are, MODE context specific
 
 const unsigned int powers [4] = {1000,100,10,1};
 
@@ -111,8 +111,15 @@ void setup(){
 // Loop functions
 void loop(){
 
-  // Will need this for handle_key events
   time = millis();
+
+  if (time < last_tick){
+    /* Time should never be before last_tick. We've wrapped the unsigned long at 50 days of millis
+       Best thing to do is to assume this literally just happened, but the only thing we can do really
+       is to set last_tick to 0
+    */
+    last_tick = 0;
+    }
 
   loop_for_mode();
 
