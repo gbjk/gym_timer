@@ -68,10 +68,10 @@ struct timer_phase {
 
 struct timer_phase timer_phases[PHASES] = {
   { 1, 0, " go ", 0, 2 },
-  { 0, 1, "",     0, 8 },     // Default to 0.08 timer
+  { 0, 1, "",     6, 0 },     // Default to 6.00 timer
   { 3, 0, "d0nE", 0, 6 },
   { 0, 0, "rE5t", 0, 3 },
-  { 0, 1, "",     0, 5 },     // Default to 0.05 rest
+  { 0, 1, "",     0, 30 },     // Default to 0.30 rest
   };
 
 int current_phase_index = ALARM_PHASE;
