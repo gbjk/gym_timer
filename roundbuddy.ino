@@ -12,6 +12,7 @@
 #include <IRsensor.h>
 #include <SevSeg.h>
 #include <SPI.h>
+#include <avr/EEPROM.h>
 
 #define USE_BUZZER 1
 
@@ -52,9 +53,10 @@ decode_results results;
 
 int mode  = WAIT;
 
-#define ALARM_PHASE 1
-#define REST_PHASE  4
-#define PHASES      5
+#define ALARM_PHASE     1
+#define REST_PHASE      4
+#define PHASES          5
+#define SAVED_TIMER_COUNT  9
 
 struct timer_phase {
   int             beeps;          // How many beeps
@@ -72,6 +74,23 @@ struct timer_phase timer_phases[PHASES] = {
   { 3, 0, "d0nE", 0, 6 },
   { 0, 0, "rE5t", 0, 3 },
   { 0, 1, "",     0, 30 },     // Default to 0.30 rest
+  };
+
+struct saved_timer {
+    int     mins;
+    int     secs;
+    int     rest;
+};
+struct saved_timer saved_timers[SAVED_TIMER_COUNT] = {
+  { 5,  0,   30 },
+  { 6,  0,   30 },
+  { 7,  0,   30 },
+  { 8,  0,   45 },
+  { 9,  0,   45 },
+  { 10, 0,   45 },
+  { 20, 0,   59 },
+  { 0,  30,  10 },
+  { 0,  60,  10 },
   };
 
 int current_phase_index = ALARM_PHASE;
@@ -97,11 +116,13 @@ void setup(){
 
   mode = WAIT;
 
-  set_time();
-
   if (DEBUG){
     Serial.begin(9600);
     }
+
+  load_saved_timers();
+
+  set_time();
 
   sevseg.begin();
 
@@ -521,4 +542,26 @@ void switch_edit_phase(){
 
   // Show the new time from the new phase
   set_time();
+  }
+
+void load_saved_timers(){
+  Serial.print("Loading saved timers");
+  saved_timer timer;
+  for (int p=0;p<=SAVED_TIMER_COUNT;p++){
+    unsigned int addr = p * sizeof(saved_timer);
+    eeprom_read_block(&timer, &addr, sizeof(timer));
+    if (timer.mins == 0xFFFF){
+      // Memory hasn't been saved yet, move on
+      continue;
+      }
+    saved_timers[p] = timer;
+    if (Serial){
+      Serial.print("Loaded timer ");
+      Serial.print(p);
+      Serial.print(": ");
+      Serial.print(timer.mins);
+      Serial.print(timer.secs);
+      Serial.println(timer.rest);
+      }
+    }
   }
