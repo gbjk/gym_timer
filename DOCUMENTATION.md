@@ -1,8 +1,17 @@
 # RoundBuddy Operating instructions
 
+## Quick Start Guide
+
+* Press ►**||** to start a timer or pause it
+* Press __mode__ to enter and exit the timer setup
+* Press __mode__ during any countdown to exit a timer, so you can skip the rest, etc
+* Press ►**||** during timer setup to just start the timer
+
+## Full Insturctions
+
 * The RoundBuddy has 4 modes: *standby*, *edit*, *countdown* and *off*
 * The *countdown* has two phases: *Round time*, and *Rest time*. Both are configurable
-* *Rest time* has a maximum of 59 seconds
+* *Rest time* has a maximum of 59 seconds, but dont forget there is always a 9 seconds from done first showing to the rest timer counting.
 * RoundBuddy starts in *standby* mode, which displays the current *Round time*
 
 ### Edit
