@@ -15,6 +15,7 @@ public:
 
   void PrintOutput();
 
+  void HideAll();
   void HideNum(byte digit);
   void ShowAll();
 
@@ -28,6 +29,7 @@ private:
   boolean mode, DigitOn, DigitOff, SegOn, SegOff;
   byte digits[4];
   byte hideNum;
+  boolean hideAll;
 };
 
 #endif

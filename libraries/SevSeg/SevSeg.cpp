@@ -82,14 +82,17 @@ void SevSeg::PrintOutput(){
   
   for (int i=0;i<4;i++) {
     byte display = digits[i];
-    if (hideNum == i){
+    if (hideAll){
+      display = B00000000;
+      }
+    else if (hideNum == i){
       display &= B00001000;
-    }
+      }
     SPI.transfer( display );
-  }
+    }
 
   digitalWrite( latch_pin, HIGH );
-}
+  }
 
 // New Number
 /*******************************************************************************************/
@@ -130,6 +133,9 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
     case 't':
       disp = B11000011;
       break;
+    case '-':
+      disp = B10000000;
+      break;
     case ' ':
       break;
     default:
@@ -147,14 +153,19 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
   }
 }
 void SevSeg::NewNum(const char* display){
-    char* pass_display = const_cast<char*>(display);
-    NewNum(pass_display, 5);
-}
+  char* pass_display = const_cast<char*>(display);
+  NewNum(pass_display, 5);
+  }
 
 void SevSeg::HideNum(byte digit){
   hideNum = digit;
   }
 
+void SevSeg::HideAll(){
+  hideAll = true;
+  }
+
 void SevSeg::ShowAll(){
   hideNum = 9;
+  hideAll = false;
   }

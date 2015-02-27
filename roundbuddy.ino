@@ -19,6 +19,8 @@
 #define IR_PIN     14
 #define BUZZ_PIN   19
 
+#define FLASH_RATE 500
+
 // MODE constants
 #define OFF             1
 #define WAIT            2
@@ -156,11 +158,11 @@ void loop(){
 
 // See DOCUMENTATION.md
 void loop_for_mode(){
-  if (mode == TIMER){
-    timer_loop();
-    }
-  else if (mode == EDIT){
-    edit_loop();
+  switch (mode){
+    case TIMER:             timer_loop();     break;
+    case EDIT:
+    case PAUSE:
+    case EXPECT_PROGRAM:    flash_loop();     break;
     }
 }
 
@@ -207,15 +209,17 @@ void timer_loop(){
     }
   }
 
-void edit_loop(){
-  // Edit flash rate
-  if (time - last_tick >= 500){
+void flash_loop(){
+  if (time - last_tick >= FLASH_RATE){
 
     last_tick = time;
 
     if (!toggle){
-      // Flash digit we're editting
-      sevseg.HideNum(edit_digit);
+      switch (mode){
+        case EDIT:            flash_edit();       break;
+        case PAUSE:           flash_paused();     break;
+        case EXPECT_PROGRAM:  flash_program();    break;
+        }
       }
     else {
       sevseg.ShowAll();
@@ -223,6 +227,18 @@ void edit_loop(){
 
     toggle = toggle ? 0 : 1;
     }
+  }
+
+void flash_edit(){
+  sevseg.HideNum(edit_digit);
+  }
+
+void flash_paused(){
+  sevseg.HideAll();
+  }
+
+void flash_program(){
+  sevseg.HideNum(3);
   }
 
 // Timer functions
@@ -342,7 +358,13 @@ void handle_mute(){
 
 void handle_swap(){
   // Programming not supported yet
-  // mode = EXPECT_PROGRAM;
+  leave_current_mode();
+  if (mode == EXPECT_PROGRAM){
+    enter_wait();
+    }
+  else {
+    enter_expect_program();
+    }
   }
 
 void handle_play(){
@@ -383,6 +405,7 @@ void handle_mode(){
 
 void handle_ff(){
   if (mode == EDIT){
+    sevseg.ShowAll();
     edit_digit += 1;
     if (edit_digit > 3){
       switch_edit_phase();
@@ -392,6 +415,7 @@ void handle_ff(){
 
 void handle_rw(){
   if (mode == EDIT){
+    sevseg.ShowAll();
     if ((current_phase_index == ALARM_PHASE && edit_digit == 0) ||
         (current_phase_index == REST_PHASE && edit_digit == 2)){
       switch_edit_phase();
@@ -405,17 +429,11 @@ void handle_rw(){
 
 void handle_number(int new_number){
   if (mode == EDIT){
-    edit_number(new_number);
+    edit_timer(new_number);
     }
-/*
   else if (mode == EXPECT_PROGRAM){
-    char display_pr[4];
-    sprintf(display_pr, "Pr %1i", new_number);
-
-    sevseg.NewNum(display_pr, 5);
-    mode = WAIT;
-  }
-*/
+    choose_timer(new_number);
+    }
   }
 
 // Change of state functions
@@ -487,8 +505,13 @@ void enter_pause(){
   end_phase();
   }
 
+void enter_expect_program(){
+  mode = EXPECT_PROGRAM;
+  sevseg.NewNum("Pr -");
+  }
+
 // Edit functions
-void edit_number(int new_number){
+void edit_timer(int new_number){
   // Nothing greater than 6 in decimal minutes or seconds
   if (new_number > 6 && edit_digit % 2 == 0){
     new_number = 6;
@@ -510,6 +533,8 @@ void edit_number(int new_number){
     int decimal = current_phase.secs / 10;
     current_phase.secs = (10 * decimal) + new_number;
     }
+
+  sevseg.ShowAll();
 
   edit_digit += 1;
 
@@ -540,10 +565,13 @@ void switch_edit_phase(){
     edit_digit = 0;
     }
 
+  sevseg.ShowAll();
+
   // Show the new time from the new phase
   set_time();
   }
 
+// Saved timer functions
 void load_saved_timers(){
   Serial.print("Loading saved timers");
   saved_timer timer;
@@ -557,11 +585,37 @@ void load_saved_timers(){
     saved_timers[p] = timer;
     if (Serial){
       Serial.print("Loaded timer ");
-      Serial.print(p);
+      Serial.print(p + 1);
       Serial.print(": ");
       Serial.print(timer.mins);
       Serial.print(timer.secs);
       Serial.println(timer.rest);
       }
     }
+  }
+
+void choose_timer(int timer_index){
+  if (! (timer_index >= 1 && timer_index <= SAVED_TIMER_COUNT)){
+    return;
+    }
+
+  char display_pr[4];
+  sprintf(display_pr, "Pr %1i", timer_index);
+
+  sevseg.ShowAll();
+  sevseg.NewNum( display_pr );
+  sevseg.PrintOutput();
+  delay(1000);
+
+  load_saved_timer( timer_index );
+
+  enter_wait();
+  }
+
+void load_saved_timer(int timer_index){
+  saved_timer new_timer = saved_timers[ timer_index - 1 ];
+
+  timer_phases[ ALARM_PHASE ].mins = new_timer.mins;
+  timer_phases[ ALARM_PHASE ].secs = new_timer.secs;
+  timer_phases[ REST_PHASE ].secs  = new_timer.rest;
   }
