@@ -27,8 +27,10 @@
 #define EDIT            3
 #define TIMER           4
 #define PAUSE           5
-
-#define EXPECT_PROGRAM  7
+#define EXPECT_PROGRAM  6
+#define EXPECT_EDIT_PR  7
+#define EDIT_PROGRAM    8
+#define CONFIRM_SAVE    9
 
 #define BUTTON_0     0xFF6897
 #define BUTTON_1     0xFF30CF
@@ -49,6 +51,7 @@
 #define BUTTON_SWAP  0xFF9867
 #define BUTTON_PLUS  0xFF906F
 #define BUTTON_MINUS 0xFFA857
+#define BUTTON_USD   0xFFB04F
 
 IRrecv irrecv(IR_PIN);
 decode_results results;
@@ -95,6 +98,9 @@ struct saved_timer saved_timers[SAVED_TIMER_COUNT] = {
   { 1,  0,   7  },
   };
 
+struct saved_timer eeprom_timers[SAVED_TIMER_COUNT] EEMEM;
+
+int current_saved_index;
 int current_phase_index = ALARM_PHASE;
 timer_phase current_phase       = timer_phases[ current_phase_index ];
 
@@ -161,7 +167,9 @@ void loop_for_mode(){
   switch (mode){
     case TIMER:             timer_loop();     break;
     case EDIT:
+    case EDIT_PROGRAM:
     case PAUSE:
+    case EXPECT_EDIT_PR:
     case EXPECT_PROGRAM:    flash_loop();     break;
     }
 }
@@ -216,8 +224,10 @@ void flash_loop(){
 
     if (!toggle){
       switch (mode){
+        case EDIT_PROGRAM:
         case EDIT:            flash_edit();       break;
         case PAUSE:           flash_paused();     break;
+        case EXPECT_EDIT_PR:
         case EXPECT_PROGRAM:  flash_program();    break;
         }
       }
@@ -317,12 +327,24 @@ void handle_key(unsigned long code){
     return;
     }
 
+  if (mode == CONFIRM_SAVE){
+    // First we finish the confirm save, before processing the button
+
+    leave_confirm_save();
+
+    if (code == BUTTON_USD){
+      save_current_timer();
+      return;
+      }
+    }
+
   switch (code){
     case BUTTON_PWR:  handle_power();   break;
     case BUTTON_PLAY: handle_play();    break;
     case BUTTON_MODE: handle_mode();    break;
     case BUTTON_SWAP: handle_swap();    break;
     case BUTTON_MUTE: handle_mute();    break;
+    case BUTTON_USD :                   break;
 
     // Currently unused
     case BUTTON_FF:   handle_ff();      break;
@@ -357,13 +379,21 @@ void handle_mute(){
   }
 
 void handle_swap(){
-  // Programming not supported yet
   leave_current_mode();
+
   if (mode == EXPECT_PROGRAM){
     enter_wait();
     }
-  else {
+  else if (mode == EXPECT_EDIT_PR){
+    // Go back to editting, like we were before
+    enter_edit();
+    }
+  else if (mode == WAIT){
     enter_expect_program();
+    }
+  else if (mode == EDIT){
+    enter_expect_program();
+    mode = EXPECT_EDIT_PR;
     }
   }
 
@@ -398,6 +428,9 @@ void handle_mode(){
   if (mode == WAIT){
     enter_edit();
     }
+  else if (mode == EDIT_PROGRAM){
+    enter_confirm_save();
+    }
   else {
     enter_wait();
     }
@@ -428,10 +461,10 @@ void handle_rw(){
   }
 
 void handle_number(int new_number){
-  if (mode == EDIT){
+  if (mode == EDIT || mode == EDIT_PROGRAM){
     edit_timer(new_number);
     }
-  else if (mode == EXPECT_PROGRAM){
+  else if (mode == EXPECT_PROGRAM || mode == EXPECT_EDIT_PR){
     choose_timer(new_number);
     }
   }
@@ -440,8 +473,11 @@ void handle_number(int new_number){
 void leave_current_mode(){
   switch (mode){
     case PAUSE:
-    case TIMER:       leave_timer();    break;
-    case EDIT:        leave_edit();     break;
+    case TIMER:           leave_timer();          break;
+    case EDIT_PROGRAM:
+    case EDIT:            leave_edit();           break;
+    case EXPECT_EDIT_PR:
+    case EXPECT_PROGRAM:  leave_expect_program(); break;
     }
   }
 
@@ -463,6 +499,10 @@ void leave_edit(){
   sevseg.ShowAll();
   }
 
+void leave_expect_program(){
+  sevseg.ShowAll();
+  }
+
 void enter_edit(){
   current_phase_index = ALARM_PHASE;
   current_phase = timer_phases[ current_phase_index ];
@@ -477,6 +517,19 @@ void enter_edit(){
   toggle    = 1;
 
   mode = EDIT;
+  }
+
+void enter_confirm_save(){
+  mode = CONFIRM_SAVE;
+  sevseg.NewNum("5AVE");
+  sevseg.ShowAll();
+  }
+
+void leave_confirm_save(){
+  timer_phases[ current_phase_index ] = current_phase;
+  sevseg.ShowAll();
+
+  enter_wait();
   }
 
 void resume_timer(){
@@ -508,6 +561,11 @@ void enter_pause(){
 void enter_expect_program(){
   mode = EXPECT_PROGRAM;
   sevseg.NewNum("Pr -");
+  }
+
+void enter_edit_program() {
+  enter_edit();
+  mode = EDIT_PROGRAM;
   }
 
 // Edit functions
@@ -573,11 +631,10 @@ void switch_edit_phase(){
 
 // Saved timer functions
 void load_saved_timers(){
-  Serial.print("Loading saved timers");
+  Serial.println("Loading saved timers");
   saved_timer timer;
   for (int p=0;p<=SAVED_TIMER_COUNT;p++){
-    unsigned int addr = p * sizeof(saved_timer);
-    eeprom_read_block(&timer, &addr, sizeof(timer));
+    eeprom_read_block((void*)&timer, &eeprom_timers[p], sizeof(timer));
     if (timer.mins == 0xFFFF){
       // Memory hasn't been saved yet, move on
       continue;
@@ -588,7 +645,9 @@ void load_saved_timers(){
       Serial.print(p + 1);
       Serial.print(": ");
       Serial.print(timer.mins);
+      Serial.print(", ");
       Serial.print(timer.secs);
+      Serial.print(", ");
       Serial.println(timer.rest);
       }
     }
@@ -609,7 +668,13 @@ void choose_timer(int timer_index){
 
   load_saved_timer( timer_index );
 
-  enter_wait();
+  if (mode == EXPECT_EDIT_PR){
+    current_saved_index = timer_index - 1;
+    enter_edit_program();
+    }
+  else {
+    enter_wait();
+    }
   }
 
 void load_saved_timer(int timer_index){
@@ -618,4 +683,31 @@ void load_saved_timer(int timer_index){
   timer_phases[ ALARM_PHASE ].mins = new_timer.mins;
   timer_phases[ ALARM_PHASE ].secs = new_timer.secs;
   timer_phases[ REST_PHASE ].secs  = new_timer.rest;
+  }
+
+void save_current_timer(){
+  if (! (current_saved_index >= 1 && current_saved_index <= SAVED_TIMER_COUNT)){
+    return;
+    }
+
+  saved_timer timer = {
+    timer_phases[ ALARM_PHASE ].mins,
+    timer_phases[ ALARM_PHASE ].secs,
+    timer_phases[ REST_PHASE ].secs,
+    };
+
+  saved_timers[ current_saved_index ] = timer;
+
+  if (Serial){
+    Serial.print("Saving timer ");
+    Serial.print(current_saved_index);
+    Serial.print(": ");
+    Serial.print(timer.mins);
+    Serial.print(", ");
+    Serial.println(timer.secs);
+    Serial.print(", ");
+    Serial.println(timer.rest);
+    }
+
+  eeprom_update_block((const void*)&timer, &eeprom_timers[current_saved_index], sizeof(timer));
   }

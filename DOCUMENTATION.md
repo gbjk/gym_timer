@@ -6,9 +6,9 @@
 * Press __mode__ to enter and exit the timer setup
 * Press __mode__ during any countdown to exit a timer, so you can skip the rest, etc
 * Press ►**||** during timer setup to just start the timer
-* Press __swap__ to choose from saved timers
+* Press __swap__ to choose from saved timer programs
 
-## Full Insturctions
+## Full Instructions
 
 * The RoundBuddy has 4 modes: *standby*, *edit*, *countdown* and *off*
 * The *countdown* has two phases: *Round time*, and *Rest time*. Both are configurable
@@ -23,12 +23,6 @@
 * After you have editted the last digit of *Round time*, the *Rest time* will display for editting
 * You can press **|**◀◀ or ▶▶**|** on the first or last digit to move between *Round time* and *Rest time* too
 * To exit *edit* mode, press the __mode__ button to return to *standby*, or ►**||** to start the *countdown*
-
-### Using Saved Timers
-* There are 9 saved timers
-* To choose a saved timer, press the __swap__ button, followed by a number 1-9
-* A list of the default saved timers is at the bottom of this guide
-* You can save your own timers. See below.
 
 ### Countdown
 * To start the countdown press ►**||**
@@ -47,9 +41,30 @@
 * RoundBuddy still consumes power when turned *off*
 * It is recommended you turn RoundBuddy off at the power socket for extended periods of inactivity
 
-## Saved Timers
+## Saved Timer Programs
 
-By default the saved timers are:
+### Using Saved Timer Pprograms
+* There are 9 saved timer programs
+* To choose a saved timer program, press the __swap__ button, followed by a number 1-9
+* A list of the default saved timer programss is at the bottom of this guide
+* You can save your own timers. See below.
+
+### Saving your own timer programs
+* Press __mode__ to enter normal edit mode
+* Press __swap__ to enter edit saved timers
+* You will be prompted "Pr -", asking for a saved program number
+* Enter a number 1-9 to load a saved timer to edit
+* If you did not mean to edit a program, you can exit in two ways:
+  * Press __swap__ again to go back to normal *edit* mode
+  * Press __mode__ to go back to *standby*
+* Otherwise: Edit the timer as per usual instructions
+* When you done, press mode, as you would normally
+* You will be prompted SAVE
+* Press __U/SD__ to save to disk. Any other button aborts the save
+* Try to avoid reprogramming the timers frequently
+
+### Default saved timer programs
+
 1. 05:00 rounds, 20 seconds rest
 2. 06:00 rounds, 30 seconds rest
 3. 07:00 rounds, 30 seconds rest

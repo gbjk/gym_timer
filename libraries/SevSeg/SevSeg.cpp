@@ -133,6 +133,9 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
     case 't':
       disp = B11000011;
       break;
+    case 'V':
+      disp = B01010111;
+      break;
     case '-':
       disp = B10000000;
       break;
