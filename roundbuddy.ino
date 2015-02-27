@@ -74,8 +74,8 @@ struct timer_phase timer_phases[PHASES] = {
   { 1, 0, " go ", 0, 2 },
   { 0, 1, "",     6, 0 },     // Default to 6.00 timer
   { 3, 0, "d0nE", 0, 6 },
-  { 0, 0, "rE5t", 0, 3 },
-  { 0, 1, "",     0, 30 },     // Default to 0.30 rest
+  { 0, 0, "rE5t", 0, 2 },
+  { 0, 1, "",     0, 22 },     // Default to 0.22 rest
   };
 
 struct saved_timer {
@@ -84,15 +84,15 @@ struct saved_timer {
     int     rest;
 };
 struct saved_timer saved_timers[SAVED_TIMER_COUNT] = {
-  { 5,  0,   30 },
+  { 5,  0,   20 },
   { 6,  0,   30 },
   { 7,  0,   30 },
-  { 8,  0,   45 },
+  { 8,  0,   40 },
   { 9,  0,   45 },
-  { 10, 0,   45 },
+  { 10, 0,   50 },
   { 20, 0,   59 },
-  { 0,  30,  10 },
-  { 0,  60,  10 },
+  { 0,  30,  2  },
+  { 1,  0,   7  },
   };
 
 int current_phase_index = ALARM_PHASE;
@@ -513,8 +513,8 @@ void enter_expect_program(){
 // Edit functions
 void edit_timer(int new_number){
   // Nothing greater than 6 in decimal minutes or seconds
-  if (new_number > 6 && edit_digit % 2 == 0){
-    new_number = 6;
+  if (new_number > 5 && edit_digit % 2 == 0){
+    new_number = 5;
     }
 
   if (edit_digit == 0){
