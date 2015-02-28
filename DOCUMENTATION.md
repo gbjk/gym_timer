@@ -12,7 +12,7 @@
 
 * The RoundBuddy has 4 modes: *standby*, *edit*, *countdown* and *off*
 * The *countdown* has two phases: *Round time*, and *Rest time*. Both are configurable
-* *Rest time* has a maximum of 59 seconds, but dont forget there is always a 8 seconds from done first showing to the rest timer counting.
+* *Rest time* has a maximum of 59 seconds
 * RoundBuddy starts in *standby* mode, which displays the current *Round time*
 
 ### Edit
@@ -28,9 +28,9 @@
 * To start the countdown press ►**||**
 * **go** displays for 2 seconds, with one beep
 * *Round time* then starts
-* When the countdown is complete **done** will display for 6 seconds, with 3 beeps
-* **rest** will display for 3 seconds
-* *Rest time* will then countdown
+* When the countdown is complete "done" will display for 6 seconds, with 3 beeps
+* "rest"* will display for 2 seconds
+* *Rest time* will then countdown with a prefix of "r "
 * The timer will continue to go from *Round time* to *Rest time* until stopped or paused
 * Press ►**||** to pause the timer, and press it again to resume the timer
 * Whilst paused, the display will flash
@@ -47,21 +47,20 @@
 * There are 9 saved timer programs
 * To choose a saved timer program, press the __swap__ button, followed by a number 1-9
 * A list of the default saved timer programss is at the bottom of this guide
-* You can save your own timers. See below.
 
 ### Saving your own timer programs
-* Press __mode__ to enter normal edit mode
+* Press __mode__ to enter normal *edit* mode
 * Press __swap__ to enter edit saved timers
 * You will be prompted "Pr -", asking for a saved program number
 * Enter a number 1-9 to load a saved timer to edit
 * If you did not mean to edit a program, you can exit in two ways:
   * Press __swap__ again to go back to normal *edit* mode
   * Press __mode__ to go back to *standby*
-* Otherwise: Edit the timer as per usual instructions
-* When you done, press mode, as you would normally
-* You will be prompted SAVE
-* Press __U/SD__ to save to disk. Any other button aborts the save
-* Try to avoid reprogramming the timers frequently
+* Otherwise: Follow the usual Edit instructions to change the saved timer
+* When you done, press __mode__
+* You will be prompted "SAVE"
+* Press __U/SD__ to save to disk. Any other button exits without saving
+* Try to avoid reprogramming the timers too frequently.
 
 ### Default saved timer programs
 
@@ -74,5 +73,3 @@
 7. 20:00 rounds, 59 seconds rest
 8. 00:30 rounds,  2 seconds rest
 9. 01:00 rounds,  7 seconds rest
-
-The rest time does not include the 8 seconds which shows done and rest.
