@@ -2,15 +2,16 @@
  7 segment driver through spi with continuous power
 
  Segments Bytes are reversed in byte order, so going from right to left: B87654321
-     --6--
-    |     |
-    7     5
-    |     |
-    |--8--|
-    |     |
-    1     3
-    |     |
-     --2--  .4
+   4" digits              6.5" digits
+     --6--                   --6--
+    |     |                 |     |
+    7     5                 7     5
+    |     |                 |     |
+    |--8--|                 |--4--|
+    |     |                 |     |
+    1     3                 1     3
+    |     |                 |     |
+     --2--  .4               --2--  .8
 
  */
 
@@ -35,6 +36,23 @@
 */
 
 const byte blank = B00000000;
+
+// Handling for different 7 segment/board layouts could be more graceful, really
+// 6.5" digit byte order
+const byte digit_bytes [10] = {
+  B01110111,
+  B00010100,
+  B00111011,
+  B00111110,
+  B01011100,
+  B01101110,
+  B01101111,
+  B00110100,
+  B01111111,
+  B01111100
+  };
+
+/* 4" digit byte order
 const byte digit_bytes [10] = {
   B01110111,
   B00010100,
@@ -47,10 +65,9 @@ const byte digit_bytes [10] = {
   B11110111,
   B11110100
   };
+*/
 
-SevSeg::SevSeg()
-{
-}
+SevSeg::SevSeg(){ }
 
 //Begin
 //Set pin modes and turns all displays off
@@ -107,37 +124,37 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
 
     switch (digit){
     case 'A':
-      disp = B11110101;
+      disp = B01111101;
       break;
     case 'd':
-      disp = B10010111;
+      disp = B00011111;
       break;
     case 'E':
-      disp = B11100011;
+      disp = B01101011;
       break;
     case 'g':
-      disp = B11110110;
+      disp = B01111110;
       break;
     case 'o': // Top segment o
-      disp = B11110000;
+      disp = B01111000;
       break;
     case 'n':
-      disp = B10000101;
+      disp = B00001101;
       break;
     case 'P':
-      disp = B11110001;
+      disp = B01111001;
       break;
     case 'r':
-      disp = B10000001;
+      disp = B00001001;
       break;
     case 't':
-      disp = B11000011;
+      disp = B01001011;
       break;
     case 'V':
       disp = B01010111;
       break;
     case '-':
-      disp = B10000000;
+      disp = B00001000;
       break;
     case ' ':
       break;
@@ -149,7 +166,7 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
 
     // Set the decimal place lights
     if (decimal_place == i + 1){
-      disp |= B00001000;
+      disp |= B10000000;
     }
 
     digits[i] = disp;
