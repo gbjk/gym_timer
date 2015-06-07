@@ -103,7 +103,7 @@ void SevSeg::PrintOutput(){
       display = B00000000;
       }
     else if (hideNum == i){
-      display &= B00001000;
+      display &= B10000000;
       }
     SPI.transfer( display );
     }
