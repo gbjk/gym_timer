@@ -1,5 +1,5 @@
 /* Arduino gym timer
- * 
+ *
  * Specifically targetted BJJ round timer.
  *
  * See LICENSE.txt for license information.
@@ -30,28 +30,33 @@
 #define EXPECT_PROGRAM  6
 #define EXPECT_EDIT_PR  7
 #define EDIT_PROGRAM    8
-#define CONFIRM_SAVE    9
 
-#define BUTTON_0     0xFF6897
-#define BUTTON_1     0xFF30CF
-#define BUTTON_2     0xFF18E7
-#define BUTTON_3     0xFF7A85
-#define BUTTON_4     0xFF10EF 
-#define BUTTON_5     0xFF38C7
-#define BUTTON_6     0xFF5AA5
-#define BUTTON_7     0xFF42BD
-#define BUTTON_8     0xFF4AB5
-#define BUTTON_9     0xFF52AD
-#define BUTTON_FF    0xFFC23D 
-#define BUTTON_RW    0xFF02FD
-#define BUTTON_PLAY  0xFF22DD
-#define BUTTON_MODE  0xFF629D
-#define BUTTON_PWR   0xFFA25D
-#define BUTTON_MUTE  0xFFE21D
-#define BUTTON_SWAP  0xFF9867
-#define BUTTON_PLUS  0xFF906F
-#define BUTTON_MINUS 0xFFA857
-#define BUTTON_USD   0xFFB04F
+#define BUTTON_0        0xFD30CF
+#define BUTTON_1        0xFD08F7
+#define BUTTON_2        0xFD8877
+#define BUTTON_3        0xFD48B7
+#define BUTTON_4        0xFD28D7
+#define BUTTON_5        0xFDA857
+#define BUTTON_6        0xFD6897
+#define BUTTON_7        0xFD18E7
+#define BUTTON_8        0xFD9867
+#define BUTTON_9        0xFD58A7
+
+#define BUTTON_LEFT     0xFD10EF
+#define BUTTON_RIGHT    0xFD50AF
+#define BUTTON_PLAY     0xFD807F
+#define BUTTON_STOP     0xFD609F
+
+#define BUTTON_SETUP    0xFD20DF
+#define BUTTON_UP       0xFDA05F
+#define BUTTON_DOWN     0xFDB04F
+#define BUTTON_ENTER    0xFD906F
+#define BUTTON_BACK     0xFD708F
+
+// Unused
+#define BUTTON_VOL_UP   0xFD00FF
+#define BUTTON_VOL_DOWN 0xFD40BF
+#define BUTTON_PWR      0xFD40BF // No power button, so this will have to do
 
 IRrecv irrecv(IR_PIN);
 decode_results results;
@@ -134,7 +139,7 @@ void setup(){
 
   sevseg.begin();
 
-  irrecv.enableIRIn(); 
+  irrecv.enableIRIn();
   }
 
 // Loop functions
@@ -175,7 +180,7 @@ void loop_for_mode(){
 }
 
 void timer_loop(){
-  if (time > current_phase.end_time){ 
+  if (time > current_phase.end_time){
     switch_phase();
     }
   else {
@@ -252,7 +257,7 @@ void flash_program(){
   }
 
 // Timer functions
-void switch_phase(){ 
+void switch_phase(){
   end_phase();
 
   current_phase_index += 1;
@@ -327,40 +332,29 @@ void handle_key(unsigned long code){
     return;
     }
 
-  if (mode == CONFIRM_SAVE){
-    // First we finish the confirm save, before processing the button
-
-    leave_confirm_save();
-
-    if (code == BUTTON_USD){
-      save_current_timer();
-      return;
-      }
-    }
-
   switch (code){
-    case BUTTON_PWR:  handle_power();   break;
-    case BUTTON_PLAY: handle_play();    break;
-    case BUTTON_MODE: handle_mode();    break;
-    case BUTTON_SWAP: handle_swap();    break;
-    case BUTTON_MUTE: handle_mute();    break;
-    case BUTTON_USD :                   break;
+    case BUTTON_PWR:    handle_power();         break;
+    case BUTTON_PLAY:   handle_play();          break;
+    case BUTTON_STOP:   handle_stop_or_mode();  break;
+    case BUTTON_ENTER:  handle_enter();         break;
+    case BUTTON_BACK:   handle_back();          break;
 
-    // Currently unused
-    case BUTTON_FF:   handle_ff();      break;
-    case BUTTON_RW:   handle_rw();      break;
+    case BUTTON_LEFT:   handle_left();    break;
+    case BUTTON_RIGHT:  handle_right();   break;
+
+    case BUTTON_SETUP:  handle_setup();   break;
 
     // Numbers
-    case BUTTON_0:     new_number = 0;  break;
-    case BUTTON_1:     new_number = 1;  break;
-    case BUTTON_2:     new_number = 2;  break;
-    case BUTTON_3:     new_number = 3;  break;
-    case BUTTON_4:     new_number = 4;  break;
-    case BUTTON_5:     new_number = 5;  break;
-    case BUTTON_6:     new_number = 6;  break;
-    case BUTTON_7:     new_number = 7;  break;
-    case BUTTON_8:     new_number = 8;  break;
-    case BUTTON_9:     new_number = 9;  break;
+    case BUTTON_0:      new_number = 0;  break;
+    case BUTTON_1:      new_number = 1;  break;
+    case BUTTON_2:      new_number = 2;  break;
+    case BUTTON_3:      new_number = 3;  break;
+    case BUTTON_4:      new_number = 4;  break;
+    case BUTTON_5:      new_number = 5;  break;
+    case BUTTON_6:      new_number = 6;  break;
+    case BUTTON_7:      new_number = 7;  break;
+    case BUTTON_8:      new_number = 8;  break;
+    case BUTTON_9:      new_number = 9;  break;
 
     default:
       if (Serial){
@@ -378,15 +372,16 @@ void handle_mute(){
   // No current handling for mute
   }
 
-void handle_swap(){
-  leave_current_mode();
+/* This button is labelled STOP/MODE, so it has very different meanings depending on current context
+   If the timer is running then it stops the timer
+   If the system is in WAIT then it allows you to choose a program
+   If the system is in EDIT then it'll switch to editing the saved programs
+*/
+void handle_stop_or_mode(){
 
-  if (mode == EXPECT_PROGRAM){
+  if (mode == TIMER || mode == PAUSE){
+    leave_current_mode();
     enter_wait();
-    }
-  else if (mode == EXPECT_EDIT_PR){
-    // Go back to editting, like we were before
-    enter_edit();
     }
   else if (mode == WAIT){
     enter_expect_program();
@@ -422,21 +417,48 @@ void handle_power(){
     }
   }
 
-void handle_mode(){
+void handle_back(){
   leave_current_mode();
+  switch (mode){
+    case EXPECT_EDIT_PR:
+      enter_edit();
+      break;
+    case EDIT_PROGRAM:
+      enter_expect_program();
+      break;
+    case EDIT:
+      enter_wait();
+      break;
+    }
+}
 
-  if (mode == WAIT){
-    enter_edit();
-    }
-  else if (mode == EDIT_PROGRAM){
-    enter_confirm_save();
-    }
-  else {
-    enter_wait();
+void handle_enter(){
+  switch (mode){
+    case EDIT:
+      save_edit();
+      leave_edit();
+      break;
+    case EDIT_PROGRAM:
+      leave_current_mode();
+      break;
     }
   }
 
-void handle_ff(){
+void handle_setup(){
+  switch (mode){
+    case EDIT:
+    case EXPECT_EDIT_PR:
+    case EDIT_PROGRAM:
+      leave_current_mode();
+      enter_wait();
+      break;
+    case WAIT:
+      enter_edit();
+      break;
+    }
+  }
+
+void handle_right(){
   if (mode == EDIT){
     sevseg.ShowAll();
     edit_digit += 1;
@@ -446,7 +468,7 @@ void handle_ff(){
     }
   }
 
-void handle_rw(){
+void handle_left(){
   if (mode == EDIT){
     sevseg.ShowAll();
     if ((current_phase_index == ALARM_PHASE && edit_digit == 0) ||
@@ -488,14 +510,18 @@ void enter_off(){
 
 void enter_wait(){
   mode = WAIT;
+  Serial.println("Enter WAIT Mode");
   current_phase_index = ALARM_PHASE;
   current_phase = timer_phases[ current_phase_index ];
   set_time();
   toggle = 1;
   }
 
-void leave_edit(){
+void save_edit(){
   timer_phases[ current_phase_index ] = current_phase;
+  }
+
+void leave_edit(){
   sevseg.ShowAll();
   }
 
@@ -504,6 +530,7 @@ void leave_expect_program(){
   }
 
 void enter_edit(){
+  Serial.println("Enter EDIT Mode");
   current_phase_index = ALARM_PHASE;
   current_phase = timer_phases[ current_phase_index ];
 
@@ -517,12 +544,6 @@ void enter_edit(){
   toggle    = 1;
 
   mode = EDIT;
-  }
-
-void enter_confirm_save(){
-  mode = CONFIRM_SAVE;
-  sevseg.NewNum("5AVE");
-  sevseg.ShowAll();
   }
 
 void leave_confirm_save(){
@@ -559,11 +580,13 @@ void enter_pause(){
   }
 
 void enter_expect_program(){
+  Serial.println("Enter EXPECT Mode");
   mode = EXPECT_PROGRAM;
   sevseg.NewNum("Pr -");
   }
 
 void enter_edit_program() {
+  Serial.println("Enter EDIT PROGRAM Mode");
   enter_edit();
   mode = EDIT_PROGRAM;
   }

@@ -3,10 +3,11 @@
 ## Quick Start Guide
 
 * Press ►**||** to start a timer or pause it
-* Press __mode__ to enter and exit the timer setup
-* Press __mode__ during any countdown to exit a timer, so you can skip the rest, etc
+* Press __SETUP__ to enter the timer setup
+* Press __STOP__ during any countdown to exit a timer, so you can skip the rest, etc
 * Press ►**||** during timer setup to just start the timer
-* Press __swap__ to choose from saved timer programs
+* Press __MODE__ to choose from saved timer programs
+* Press the ⤴ button to exit setup
 
 ## Full Instructions
 
@@ -16,7 +17,7 @@
 * RoundBuddy starts in *standby* mode, which displays the current *Round time*
 
 ### Edit
-* To edit the timers, press the __mode__ button in *standby* mode
+* To edit the timers, press the __SETUP__ button in *standby* mode
 * First the *Round time* is displayed
 * The current digit flashes. Enter a number to replace it, and the next number will flash
 * Or press **|**◀◀ or ▶▶**|** to move left or right
@@ -43,7 +44,7 @@
 
 ## Saved Timer Programs
 
-### Using Saved Timer Pprograms
+### Using Saved Timer Programs
 * There are 9 saved timer programs
 * To choose a saved timer program, press the __swap__ button, followed by a number 1-9
 * A list of the default saved timer programss is at the bottom of this guide
