@@ -94,18 +94,18 @@ void SevSeg::PrintOutput(){
   digitalWrite( latch_pin, HIGH );
   }
 
-char last_display[4] = {};
+char last_display[4];
 // New Number
 /*******************************************************************************************/
 // Function to update the number displayed
 void SevSeg::NewNum(char display[4], byte decimal_place)
 {
 
-  if (display != last_display) {
-    Serial.print("Display: ");
+  if (strcmp(display, last_display)) {
+    Serial.print("Display: |");
     Serial.println( display );
 
-    memcpy(last_display, display, 4);
+    strcpy(last_display, display);
     }
 
   for (int i=0;i<4;i++) {
