@@ -427,6 +427,7 @@ void handle_back(){
       enter_expect_program();
       break;
     case EDIT:
+    case EXPECT_PROGRAM:
       enter_wait();
       break;
     }
