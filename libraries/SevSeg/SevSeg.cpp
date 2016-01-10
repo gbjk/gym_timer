@@ -102,7 +102,7 @@ void SevSeg::NewNum(char display[4], byte decimal_place)
 {
 
   if (strcmp(display, last_display)) {
-    Serial.print("Display: |");
+    Serial.print("Display: ");
     Serial.println( display );
 
     strcpy(last_display, display);

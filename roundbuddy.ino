@@ -82,24 +82,25 @@ struct timer_phase timer_phases[PHASES] = {
   { 0, 1, "",     6, 0 },     // Default to 6.00 timer
   { 3, 0, "d0nE", 0, 6 },
   { 0, 0, "rE5t", 0, 2 },
-  { 0, 1, "",     0, 22 },     // Default to 0.22 rest
+  { 0, 1, "",     1, 30 },     // Default to 1.30 rest
   };
 
 struct saved_timer {
     int     mins;
     int     secs;
-    int     rest;
+    int     rest_mins;
+    int     rest_secs;
 };
 struct saved_timer saved_timers[SAVED_TIMER_COUNT] = {
-  { 5,  0,   20 },
-  { 6,  0,   30 },
-  { 7,  0,   30 },
-  { 8,  0,   40 },
-  { 9,  0,   45 },
-  { 10, 0,   50 },
-  { 20, 0,   59 },
-  { 0,  30,  2  },
-  { 1,  0,   7  },
+  { 5,  0,   1, 30 },
+  { 6,  0,   1, 30 },
+  { 7,  0,   1, 30 },
+  { 8,  0,   2, 0 },
+  { 9,  0,   2, 0 },
+  { 10, 0,   2, 0 },
+  { 20, 0,   4, 0 },
+  { 0,  30,  0, 10  },
+  { 1,  0,   0, 10  },
   };
 
 struct saved_timer eeprom_timers[SAVED_TIMER_COUNT] EEMEM;
@@ -313,13 +314,12 @@ void set_time(){
   char display_timer[4];
 
   if (current_phase_index == REST_PHASE){
-    sprintf(display_timer, "r %02i", current_phase.secs);
-    sevseg.NewNum(display_timer, 5);
+    sprintf(display_timer, "r%i%02i", current_phase.mins, current_phase.secs);
     }
   else {
     sprintf(display_timer, "%02i%02i", current_phase.mins, current_phase.secs);
-    sevseg.NewNum(display_timer, 2);
     }
+  sevseg.NewNum(display_timer, 2);
 
   }
 
@@ -412,7 +412,7 @@ void handle_play(){
     }
   }
 
-void handle_power(){
+void handle_vol_down(){
   leave_current_mode();
 
   if (mode == OFF){
@@ -446,6 +446,7 @@ void handle_enter(){
       leave_edit();
       break;
     case EDIT_PROGRAM:
+      save_current_timer();
       leave_current_mode();
       break;
     }
@@ -479,7 +480,7 @@ void handle_left(){
   if (mode == EDIT){
     sevseg.ShowAll();
     if ((current_phase_index == ALARM_PHASE && edit_digit == 0) ||
-        (current_phase_index == REST_PHASE && edit_digit == 2)){
+        (current_phase_index == REST_PHASE && edit_digit == 1)){
       switch_edit_phase();
       edit_digit = 3;
       }
@@ -647,7 +648,7 @@ void switch_edit_phase(){
   current_phase = timer_phases[ current_phase_index ];
 
   if (current_phase_index == REST_PHASE){
-    edit_digit = 2;
+    edit_digit = 1;
     }
   else {
     edit_digit = 0;
@@ -675,10 +676,12 @@ void load_saved_timers(){
       Serial.print(p + 1);
       Serial.print(": ");
       Serial.print(timer.mins);
-      Serial.print(", ");
+      Serial.print(":");
       Serial.print(timer.secs);
       Serial.print(", ");
-      Serial.println(timer.rest);
+      Serial.print(timer.rest_mins);
+      Serial.print(":");
+      Serial.println(timer.rest_secs);
       }
     }
   }
@@ -712,7 +715,8 @@ void load_saved_timer(int timer_index){
 
   timer_phases[ ALARM_PHASE ].mins = new_timer.mins;
   timer_phases[ ALARM_PHASE ].secs = new_timer.secs;
-  timer_phases[ REST_PHASE ].secs  = new_timer.rest;
+  timer_phases[ REST_PHASE ].mins  = new_timer.rest_mins;
+  timer_phases[ REST_PHASE ].secs  = new_timer.rest_secs;
   }
 
 void save_current_timer(){
@@ -723,6 +727,7 @@ void save_current_timer(){
   saved_timer timer = {
     timer_phases[ ALARM_PHASE ].mins,
     timer_phases[ ALARM_PHASE ].secs,
+    timer_phases[ REST_PHASE ].mins,
     timer_phases[ REST_PHASE ].secs,
     };
 
@@ -733,10 +738,12 @@ void save_current_timer(){
     Serial.print(current_saved_index);
     Serial.print(": ");
     Serial.print(timer.mins);
+    Serial.print(":");
+    Serial.print(timer.secs);
     Serial.print(", ");
-    Serial.println(timer.secs);
-    Serial.print(", ");
-    Serial.println(timer.rest);
+    Serial.print(timer.rest_mins);
+    Serial.print(":");
+    Serial.print(timer.rest_secs);
     }
 
   eeprom_update_block((const void*)&timer, &eeprom_timers[current_saved_index], sizeof(timer));
