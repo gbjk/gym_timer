@@ -74,3 +74,8 @@
 7. 20:00 rounds, 59 seconds rest
 8. 00:30 rounds,  2 seconds rest
 9. 01:00 rounds,  7 seconds rest
+
+### Restore default saved timers
+* Press __SETUP__ to enter the timer setup
+* Press __MODE__ to enter the saved program setup
+* Press __VOL-__ at the prompt PR-

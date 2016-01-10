@@ -56,7 +56,6 @@
 // Unused
 #define BUTTON_VOL_UP   0xFD00FF
 #define BUTTON_VOL_DOWN 0xFD40BF
-#define BUTTON_PWR      0xFD40BF // No power button, so this will have to do
 
 IRrecv irrecv(IR_PIN);
 decode_results results;
@@ -328,33 +327,36 @@ void set_time(){
 void handle_key(unsigned long code){
   int new_number = 10;
 
-  if (mode == OFF && code != BUTTON_PWR){
+  if (mode == OFF && code != BUTTON_VOL_DOWN){
     return;
     }
 
   switch (code){
-    case BUTTON_PWR:    handle_power();         break;
-    case BUTTON_PLAY:   handle_play();          break;
-    case BUTTON_STOP:   handle_stop_or_mode();  break;
-    case BUTTON_ENTER:  handle_enter();         break;
-    case BUTTON_BACK:   handle_back();          break;
+    // Control buttons, in order of rows
+    case BUTTON_VOL_DOWN:   handle_vol_down();      break;
+    case BUTTON_PLAY:       handle_play();          break;
+    case BUTTON_VOL_UP:     handle_vol_up();        break;
 
-    case BUTTON_LEFT:   handle_left();    break;
-    case BUTTON_RIGHT:  handle_right();   break;
+    case BUTTON_SETUP:      handle_setup();         break;
+    case BUTTON_STOP:       handle_stop_or_mode();  break;
 
-    case BUTTON_SETUP:  handle_setup();   break;
+    case BUTTON_LEFT:       handle_left();          break;
+    case BUTTON_ENTER:      handle_enter();         break;
+    case BUTTON_RIGHT:      handle_right();         break;
+
+    case BUTTON_BACK:       handle_back();          break;
 
     // Numbers
-    case BUTTON_0:      new_number = 0;  break;
-    case BUTTON_1:      new_number = 1;  break;
-    case BUTTON_2:      new_number = 2;  break;
-    case BUTTON_3:      new_number = 3;  break;
-    case BUTTON_4:      new_number = 4;  break;
-    case BUTTON_5:      new_number = 5;  break;
-    case BUTTON_6:      new_number = 6;  break;
-    case BUTTON_7:      new_number = 7;  break;
-    case BUTTON_8:      new_number = 8;  break;
-    case BUTTON_9:      new_number = 9;  break;
+    case BUTTON_0:          new_number = 0;         break;
+    case BUTTON_1:          new_number = 1;         break;
+    case BUTTON_2:          new_number = 2;         break;
+    case BUTTON_3:          new_number = 3;         break;
+    case BUTTON_4:          new_number = 4;         break;
+    case BUTTON_5:          new_number = 5;         break;
+    case BUTTON_6:          new_number = 6;         break;
+    case BUTTON_7:          new_number = 7;         break;
+    case BUTTON_8:          new_number = 8;         break;
+    case BUTTON_9:          new_number = 9;         break;
 
     default:
       if (Serial){
@@ -368,8 +370,12 @@ void handle_key(unsigned long code){
   }
 }
 
-void handle_mute(){
-  // No current handling for mute
+void handle_vol_up(){
+  if (mode == EXPECT_EDIT_PR){
+    // Reset the prom
+    reset_saved_timers();
+    leave_current_mode();
+    }
   }
 
 /* This button is labelled STOP/MODE, so it has very different meanings depending on current context
@@ -734,4 +740,13 @@ void save_current_timer(){
     }
 
   eeprom_update_block((const void*)&timer, &eeprom_timers[current_saved_index], sizeof(timer));
+  }
+
+void reset_saved_timers(){
+  Serial.println("Resetting saved timers");
+  saved_timer timer;
+  timer.mins = 0xFFFF;
+  for (int p=0;p<=SAVED_TIMER_COUNT;p++){
+    eeprom_update_block((const void*)&timer, &eeprom_timers[p], sizeof(timer));
+    }
   }
