@@ -204,13 +204,6 @@ void timer_loop(){
           }
         toggle = toggle ? 0 : 1;
         }
-
-      if (Serial && current_phase.show_time){
-          Serial.print(">  ");
-          Serial.print(current_phase.mins);
-          Serial.print(".");
-          Serial.println(current_phase.secs);
-          }
       }
     }
 
@@ -288,11 +281,6 @@ void continue_phase(){
   if (Serial){
     Serial.print("Starting phase: ");
     Serial.println(current_phase_index);
-
-    if (!current_phase.show_time){
-      Serial.print(">  ");
-      Serial.println(current_phase.display);
-      }
 
     Serial.print("Current time: ");
     Serial.println(time);
