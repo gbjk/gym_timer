@@ -22,8 +22,10 @@
 * The current digit flashes. Enter a number to replace it, and the next number will flash
 * Or press **|**◀◀ or ▶▶**|** to move left or right
 * After you have editted the last digit of *Round time*, the *Rest time* will display for editting
+* Note: When you move from *Round time* to *Rest time*, the *Round time* will be saved
 * You can press **|**◀◀ or ▶▶**|** on the first or last digit to move between *Round time* and *Rest time* too
-* To exit *edit* mode, press the __mode__ button to return to *standby*, or ►**||** to start the *countdown*
+* To save *edit* mode, press the __ENTER/SAVE_ button to return to *standby*, or ►**||** to start the *countdown*
+* To leave *edit* mode without saving, press __SETUP__ or ⤴
 
 ### Countdown
 * To start the countdown press ►**||**
@@ -78,4 +80,4 @@
 ### Restore default saved timers
 * Press __SETUP__ to enter the timer setup
 * Press __MODE__ to enter the saved program setup
-* Press __VOL-__ at the prompt PR-
+* Press __VOL+__ at the prompt PR-
