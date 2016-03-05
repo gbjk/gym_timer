@@ -53,9 +53,8 @@
 #define BUTTON_ENTER    0xFD906F
 #define BUTTON_BACK     0xFD708F
 
-// Unused
-#define BUTTON_VOL_UP   0xFD00FF
-#define BUTTON_VOL_DOWN 0xFD40BF
+#define BUTTON_VOL_DOWN 0xFD00FF
+#define BUTTON_VOL_UP   0xFD40BF
 
 IRrecv irrecv(IR_PIN);
 decode_results results;
