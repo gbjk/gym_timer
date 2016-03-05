@@ -454,7 +454,7 @@ void handle_setup(){
   }
 
 void handle_right(){
-  if (mode == EDIT){
+  if (mode == EDIT || mode == EDIT_PROGRAM){
     sevseg.ShowAll();
     edit_digit += 1;
     if (edit_digit > 3){
@@ -464,7 +464,7 @@ void handle_right(){
   }
 
 void handle_left(){
-  if (mode == EDIT){
+  if (mode == EDIT || mode == EDIT_PROGRAM){
     sevseg.ShowAll();
     if ((current_phase_index == ALARM_PHASE && edit_digit == 0) ||
         (current_phase_index == REST_PHASE && edit_digit == 1)){
@@ -708,9 +708,11 @@ void load_saved_timer(int timer_index){
   }
 
 void save_current_timer(){
-  if (! (current_saved_index >= 1 && current_saved_index <= SAVED_TIMER_COUNT)){
+  if (! (current_saved_index >= 0 && current_saved_index <= SAVED_TIMER_COUNT)){
     return;
     }
+
+  timer_phases[ current_phase_index ] = current_phase;
 
   saved_timer timer = {
     timer_phases[ ALARM_PHASE ].mins,
