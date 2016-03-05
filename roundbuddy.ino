@@ -132,11 +132,11 @@ void setup(){
     Serial.begin(9600);
     }
 
+  sevseg.begin();
+
   load_saved_timers();
 
-  set_time();
-
-  sevseg.begin();
+  enter_wait();
 
   irrecv.enableIRIn();
   }
@@ -362,6 +362,7 @@ void handle_vol_up(){
     // Reset the prom
     reset_saved_timers();
     leave_current_mode();
+    enter_wait();
     }
   }
 
@@ -674,6 +675,9 @@ void load_saved_timers(){
       Serial.println(timer.rest_secs);
       }
     }
+
+  Serial.println("Defaulting to second saved timer");
+  load_saved_timer(2);
   }
 
 void choose_timer(int timer_index){
@@ -752,5 +756,4 @@ void reset_saved_timers(){
     eeprom_update_block((const void*)&timer, &eeprom_timers[p], sizeof(timer));
     }
   load_saved_timers();
-  load_saved_timer(current_saved_index);
   }

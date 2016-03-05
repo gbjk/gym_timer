@@ -50,6 +50,7 @@
 * There are 9 saved timer programs
 * To choose a saved timer program, press the __swap__ button, followed by a number 1-9
 * A list of the default saved timer programss is at the bottom of this guide
+* The second saved timer is the one that is always loaded when the unit is turned off and back on
 
 ### Saving your own timer programs
 * Press __mode__ to enter normal *edit* mode
