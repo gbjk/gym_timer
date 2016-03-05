@@ -431,10 +431,12 @@ void handle_enter(){
     case EDIT:
       save_edit();
       leave_edit();
+      enter_wait();
       break;
     case EDIT_PROGRAM:
       save_current_timer();
       leave_current_mode();
+      enter_wait();
       break;
     }
   }
