@@ -505,6 +505,7 @@ void enter_off(){
   }
 
 void enter_wait(){
+  sevseg.ShowAll();
   mode = WAIT;
   Serial.println("Enter WAIT Mode");
   current_phase_index = ALARM_PHASE;

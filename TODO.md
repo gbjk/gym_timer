@@ -1,5 +1,4 @@
 = Bugs
-* Exit flashing paused can leave everything off
 
 = Button rewrite
 == Progress
