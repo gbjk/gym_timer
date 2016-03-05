@@ -742,10 +742,15 @@ void save_current_timer(){
   }
 
 void reset_saved_timers(){
-  Serial.println("Resetting saved timers");
+  Serial.println("Reset saved timers");
   saved_timer timer;
   timer.mins = 0xFFFF;
+  timer.secs = 0xFFFF;
+  timer.rest_mins = 0xFFFF;
+  timer.rest_secs = 0xFFFF;
   for (int p=0;p<=SAVED_TIMER_COUNT;p++){
     eeprom_update_block((const void*)&timer, &eeprom_timers[p], sizeof(timer));
     }
+  load_saved_timers();
+  load_saved_timer(current_saved_index);
   }
