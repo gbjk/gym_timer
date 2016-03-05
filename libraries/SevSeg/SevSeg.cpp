@@ -111,11 +111,19 @@ void SevSeg::PrintOutput(){
   digitalWrite( latch_pin, HIGH );
   }
 
+char last_display[4];
 // New Number
 /*******************************************************************************************/
 // Function to update the number displayed
 void SevSeg::NewNum(char display[4], byte decimal_place)
 {
+
+  if (strcmp(display, last_display)) {
+    Serial.print("Display: ");
+    Serial.println( display );
+
+    strcpy(last_display, display);
+    }
 
   for (int i=0;i<4;i++) {
     char digit = display[i];
