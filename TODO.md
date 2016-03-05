@@ -3,7 +3,6 @@
 
 = Button rewrite
 == Progress
-* Started only on SETUP, not exiting mode
 
 == Next
 * UP / Down buttons
